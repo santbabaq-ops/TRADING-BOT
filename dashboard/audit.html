@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audit Code — Polymarket RBI Bot</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-deep: #0a0a14;
+    --bg-surface: #10101e;
+    --bg-card: #161628;
+    --bg-card-hover: #1c1c36;
+    --border: #232340;
+    --border-subtle: #1a1a30;
+    --text-primary: #e8e8f0;
+    --text-secondary: #8888a8;
+    --text-muted: #55556e;
+    --critique: #ff3b5c;
+    --critique-bg: rgba(255, 59, 92, 0.08);
+    --critique-border: rgba(255, 59, 92, 0.25);
+    --important: #ff8c38;
+    --important-bg: rgba(255, 140, 56, 0.08);
+    --important-border: rgba(255, 140, 56, 0.25);
+    --moyen: #e8c840;
+    --moyen-bg: rgba(232, 200, 64, 0.08);
+    --moyen-border: rgba(232, 200, 64, 0.25);
+    --mineur: #6878a0;
+    --mineur-bg: rgba(104, 120, 160, 0.08);
+    --mineur-border: rgba(104, 120, 160, 0.25);
+    --accent: #7c6aff;
+    --accent-glow: rgba(124, 106, 255, 0.15);
+    --green: #00d68f;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --font-body: 'DM Sans', -apple-system, sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Ambient glow */
+  .ambient-glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(150px);
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-1 { top: -200px; left: -100px; background: var(--critique); }
+  .glow-2 { bottom: -200px; right: -100px; background: var(--accent); }
+
+  /* Layout */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .sidebar-logo h2 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .sidebar-logo span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+  }
+
+  .nav-section {
+    padding: 0 16px;
+    margin-bottom: 20px;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    padding: 0 8px;
+    margin-bottom: 8px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .nav-link:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+  }
+
+  .nav-link .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .nav-link .count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .sidebar-footer p {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    line-height: 1.8;
+  }
+
+  /* Main content */
+  .main {
+    padding: 48px 56px 80px;
+    max-width: 960px;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 48px;
+    animation: fadeSlideIn 0.6s ease-out;
+  }
+
+  .header-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .header-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .header-subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    max-width: 600px;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    animation: fadeSlideIn 0.6s ease-out 0.1s both;
+  }
+
+  .stat-cell {
+    background: var(--bg-card);
+    padding: 20px 16px;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .stat-cell:hover { background: var(--bg-card-hover); }
+
+  .stat-number {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  /* Severity bar */
+  .severity-bar-container {
+    margin-bottom: 48px;
+    animation: fadeSlideIn 0.6s ease-out 0.2s both;
+  }
+
+  .severity-bar {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--bg-card);
+  }
+
+  .severity-bar div {
+    transition: width 1s ease-out;
+  }
+
+  .severity-bar .seg-critique { background: var(--critique); }
+  .severity-bar .seg-important { background: var(--important); }
+  .severity-bar .seg-moyen { background: var(--moyen); }
+  .severity-bar .seg-mineur { background: var(--mineur); }
+
+  .severity-legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  /* Sections */
+  .section {
+    margin-bottom: 48px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+
+  .badge-critique { background: var(--critique-bg); color: var(--critique); border: 1px solid var(--critique-border); }
+  .badge-important { background: var(--important-bg); color: var(--important); border: 1px solid var(--important-border); }
+  .badge-moyen { background: var(--moyen-bg); color: var(--moyen); border: 1px solid var(--moyen-border); }
+  .badge-mineur { background: var(--mineur-bg); color: var(--mineur); border: 1px solid var(--mineur-border); }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .section-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Issue cards */
+  .issue-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 12px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .issue-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+  }
+
+  .issue-card.critique::before { background: var(--critique); }
+  .issue-card.important::before { background: var(--important); }
+  .issue-card.moyen::before { background: var(--moyen); }
+  .issue-card.mineur::before { background: var(--mineur); }
+
+  .issue-card:hover {
+    background: var(--bg-card-hover);
+    border-color: #2a2a4a;
+    transform: translateX(2px);
+  }
+
+  .issue-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+
+  .issue-number {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .issue-card.critique .issue-number { background: var(--critique-bg); color: var(--critique); border: 1px solid var(--critique-border); }
+  .issue-card.important .issue-number { background: var(--important-bg); color: var(--important); border: 1px solid var(--important-border); }
+  .issue-card.moyen .issue-number { background: var(--moyen-bg); color: var(--moyen); border: 1px solid var(--moyen-border); }
+  .issue-card.mineur .issue-number { background: var(--mineur-bg); color: var(--mineur); border: 1px solid var(--mineur-border); }
+
+  .issue-title-block {
+    flex: 1;
+  }
+
+  .issue-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .issue-file {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: rgba(124, 106, 255, 0.08);
+    padding: 2px 8px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+
+  .issue-desc {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+    margin-bottom: 14px;
+    padding-left: 42px;
+  }
+
+  .issue-reco {
+    padding-left: 42px;
+  }
+
+  .reco-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(124, 106, 255, 0.15);
+    border-radius: 6px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    line-height: 1.55;
+  }
+
+  .reco-box .reco-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-weight: 700;
+  }
+
+  /* Code */
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: rgba(124, 106, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: #c0b8ff;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeSlideIn 0.6s ease-out 0.5s both;
+  }
+
+  .footer-left {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .footer-right {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .footer-right .pulse {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  /* Animations */
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .section { animation: fadeSlideIn 0.6s ease-out both; }
+  #section-critique { animation-delay: 0.2s; }
+  #section-important { animation-delay: 0.3s; }
+  #section-moyen { animation-delay: 0.4s; }
+  #section-mineur { animation-delay: 0.5s; }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #1a1a1a; }
+    body::before { display: none; }
+    .ambient-glow { display: none; }
+    .sidebar { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .main { padding: 24px; max-width: 100%; }
+    .issue-card { break-inside: avoid; border: 1px solid #ccc; background: #fafafa; }
+    .issue-card:hover { transform: none; }
+    .stats-bar { border: 1px solid #ccc; }
+    .stat-cell { background: #f5f5f5; }
+    .stat-number, .issue-title, .section-title { color: #1a1a1a; }
+    .issue-desc, .stat-label, .reco-box { color: #444; }
+    .reco-box { background: #f0f0ff; border-color: #ccc; }
+    code { background: #eee; color: #333; }
+    .severity-bar { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .section-badge { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .issue-number { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    .issue-card::before { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 24px 20px 60px; }
+    .stats-bar { grid-template-columns: repeat(3, 1fr); }
+    .header h1 { font-size: 26px; }
+    .issue-desc, .issue-reco { padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient-glow glow-1"></div>
+<div class="ambient-glow glow-2"></div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h2>Audit</h2>
+      <span>Polymarket RBI Bot</span>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Severite</div>
+      <a href="#section-critique" class="nav-link">
+        <span class="dot" style="background:var(--critique)"></span>
+        Critique
+        <span class="count">3</span>
+      </a>
+      <a href="#section-important" class="nav-link">
+        <span class="dot" style="background:var(--important)"></span>
+        Important
+        <span class="count">4</span>
+      </a>
+      <a href="#section-moyen" class="nav-link">
+        <span class="dot" style="background:var(--moyen)"></span>
+        Moyen
+        <span class="count">5</span>
+      </a>
+      <a href="#section-mineur" class="nav-link">
+        <span class="dot" style="background:var(--mineur)"></span>
+        Mineur
+        <span class="count">3</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Navigation</div>
+      <a href="#top" class="nav-link">
+        <span class="dot" style="background:var(--accent)"></span>
+        Vue d'ensemble
+      </a>
+      <a href="index.html" class="nav-link">
+        <span class="dot" style="background:var(--green)"></span>
+        Dashboard
+      </a>
+      <a href="docs.html" class="nav-link">
+        <span class="dot" style="background:var(--text-muted)"></span>
+        Documentation
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <p>Genere le 26/03/2026<br>Claude Code &middot; Opus 4.6</p>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main class="main" id="top">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-eyebrow">Rapport d'audit de code</div>
+      <h1>Polymarket RBI Bot</h1>
+      <p class="header-subtitle">Analyse approfondie de la base de code : architecture, fiabilite, securite et qualite. 15 points identifies, classes par severite.</p>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-cell">
+        <div class="stat-number" style="color:var(--text-primary)">15</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-number" style="color:var(--critique)">3</div>
+        <div class="stat-label">Critique</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-number" style="color:var(--important)">4</div>
+        <div class="stat-label">Important</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-number" style="color:var(--moyen)">5</div>
+        <div class="stat-label">Moyen</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-number" style="color:var(--mineur)">3</div>
+        <div class="stat-label">Mineur</div>
+      </div>
+    </div>
+
+    <!-- Severity bar -->
+    <div class="severity-bar-container">
+      <div class="severity-bar">
+        <div class="seg-critique" style="width:20%"></div>
+        <div class="seg-important" style="width:26.7%"></div>
+        <div class="seg-moyen" style="width:33.3%"></div>
+        <div class="seg-mineur" style="width:20%"></div>
+      </div>
+      <div class="severity-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:var(--critique)"></span> Critique &mdash; bloque le fonctionnement live</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--important)"></span> Important &mdash; fiabilite compromise</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--moyen)"></span> Moyen &mdash; design et robustesse</span>
+        <span class="legend-item"><span class="legend-dot" style="background:var(--mineur)"></span> Mineur &mdash; qualite de code</span>
+      </div>
+    </div>
+
+    <!-- ==================== CRITIQUE ==================== -->
+    <section class="section" id="section-critique">
+      <div class="section-header">
+        <span class="section-badge badge-critique">Critique</span>
+        <span class="section-title">Bloquant pour le trading live</span>
+        <span class="section-count">3 points</span>
+      </div>
+
+      <div class="issue-card critique">
+        <div class="issue-top">
+          <span class="issue-number">1</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Bot manager = simulateur random</div>
+            <span class="issue-file">api/bot_manager.py:144-168</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          La boucle <code>_run()</code> genere des trades aleatoires avec <code>random.random()</code>. Le <code>Trader</code> est instancie mais <strong>jamais utilise</strong>. En mode live, aucun vrai trade ne serait execute &mdash; le dashboard affiche des donnees fictives.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Brancher le <code>Trader.execute_once()</code> dans la boucle <code>_run()</code> avec un fetch de donnees reel via l'API Polymarket ou ccxt. Conserver le mode simulation comme fallback explicite.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card critique">
+        <div class="issue-top">
+          <span class="issue-number">2</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Token ID en dur</div>
+            <span class="issue-file">api/bot_manager.py:135</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          <code>token_id="placeholder"</code> est code en dur. Aucun mecanisme pour selectionner un marche Polymarket reel. Meme si le Trader etait branche, il ne saurait pas sur quel marche operer.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Ajouter un selecteur de marche dans le dashboard et l'API (<code>POST /api/bots/{key}/start</code> avec un <code>token_id</code> en parametre). Proposer une liste des marches actifs via l'API Polymarket.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card critique">
+        <div class="issue-top">
+          <span class="issue-number">3</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Pas de donnees live</div>
+            <span class="issue-file">bot/trader.py:106-122</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          <code>run_loop()</code> itere sur un DataFrame statique passe en parametre. Il n'y a aucun fetch de donnees temps reel &mdash; la boucle rejoue des donnees historiques ligne par ligne au lieu de consommer un flux live.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Implementer un fetch cyclique dans <code>run_loop()</code> : appeler <code>downloader.fetch_ohlcv()</code> ou <code>polymarket_client.get_price()</code> a chaque iteration avec un <code>time.sleep(interval)</code>. Construire le DataFrame de facon incrementale.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== IMPORTANT ==================== -->
+    <section class="section" id="section-important">
+      <div class="section-header">
+        <span class="section-badge badge-important">Important</span>
+        <span class="section-title">Fiabilite compromise</span>
+        <span class="section-count">4 points</span>
+      </div>
+
+      <div class="issue-card important">
+        <div class="issue-top">
+          <span class="issue-number">4</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Calcul PnL ambigu</div>
+            <span class="issue-file">bot/position_tracker.py:52-55</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          <code>pnl = (exit - entry) / entry * size</code> &mdash; <code>size</code> est en dollars, donc le resultat est un pourcentage multiplie par un montant. Mathematiquement correct, mais la semantique est confuse : le PnL est en dollars uniquement par coincidence.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Clarifier avec <code>pnl = (exit - entry) * quantity</code> ou <code>quantity = size / entry</code> est le nombre d'unites. Ajouter un commentaire expliquant l'unite du resultat.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card important">
+        <div class="issue-top">
+          <span class="issue-number">5</span>
+          <div class="issue-title-block">
+            <div class="issue-title">init_db() appele a chaque trade</div>
+            <span class="issue-file">data/storage.py:66-67</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          Chaque appel a <code>log_trade()</code> execute <code>init_db()</code> qui cree une nouvelle connexion SQLite et relance <code>CREATE TABLE IF NOT EXISTS</code>. Pas de connection pooling &mdash; en haute frequence, risque de <code>database is locked</code>.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Initialiser la base une seule fois au demarrage. Utiliser un singleton de connexion avec <code>threading.Lock</code> ou passer a <code>sqlite3.connect(check_same_thread=False)</code> avec un pool.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card important">
+        <div class="issue-top">
+          <span class="issue-number">6</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Pas de validation PUT /api/settings</div>
+            <span class="issue-file">api/server.py:114-117</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          L'endpoint accepte n'importe quelle valeur : <code>position_size: -999</code>, <code>stop_loss_pct: 500</code>. Le modele Pydantic <code>SettingsUpdate</code> definit les types mais aucune borne. Un appel malveillant ou une erreur UI peut casser le risk manager.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Ajouter des validateurs Pydantic : <code>Field(ge=0.01, le=1000)</code> pour <code>position_size</code>, <code>Field(ge=0.1, le=50)</code> pour les pourcentages. Retourner 422 si hors bornes.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card important">
+        <div class="issue-top">
+          <span class="issue-number">7</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Mutation globale DRY_RUN</div>
+            <span class="issue-file">api/bot_manager.py:259</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          <code>settings.DRY_RUN = self._settings["dry_run"]</code> modifie une variable globale du module depuis un thread. Tous les threads de bots partagent cet etat sans synchronisation &mdash; race condition possible si un bot est en cours d'execution.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Passer <code>dry_run</code> en parametre d'instance au <code>Trader</code> et au <code>PolymarketClient</code>. Supprimer la mutation globale. Chaque bot lit sa propre config.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MOYEN ==================== -->
+    <section class="section" id="section-moyen">
+      <div class="section-header">
+        <span class="section-badge badge-moyen">Moyen</span>
+        <span class="section-title">Design et robustesse</span>
+        <span class="section-count">5 points</span>
+      </div>
+
+      <div class="issue-card moyen">
+        <div class="issue-top">
+          <span class="issue-number">8</span>
+          <div class="issue-title-block">
+            <div class="issue-title">CORS grand ouvert</div>
+            <span class="issue-file">api/server.py:20-25</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          <code>allow_origins=["*"]</code> autorise n'importe quel site web a appeler l'API. En production, avec des cles privees Polygon en memoire, un site malveillant pourrait declencher des trades via le navigateur de l'utilisateur.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Restreindre a <code>allow_origins=["http://localhost:1818"]</code> ou rendre configurable via <code>.env</code>.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card moyen">
+        <div class="issue-top">
+          <span class="issue-number">9</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Scaler sans mecanisme de descente</div>
+            <span class="issue-file">incubation/scaler.py</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          L'echelle progressive monte de $1 a $100 quand les conditions sont remplies, mais ne <strong>redescend jamais</strong>. Si les performances se degradent apres un level-up, le bot continue a trader avec une taille de position elevee.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Ajouter un <code>_evaluate_level_down()</code> : si le win rate tombe sous 45% ou le profit factor sous 0.8, redescendre d'un niveau. Proteger le capital.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card moyen">
+        <div class="issue-top">
+          <span class="issue-number">10</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Stop-loss sur close uniquement</div>
+            <span class="issue-file">backtesting/engine.py:48-83</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          Le moteur de backtest verifie le stop-loss sur le <code>close</code> de la bougie, pas sur le <code>low</code> (pour un BUY) ou le <code>high</code> (pour un SELL). En realite, le stop serait touche intra-bougie &mdash; le backtest est donc trop optimiste.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Verifier le stop-loss sur <code>curr["low"]</code> pour les positions BUY et <code>curr["high"]</code> pour les SELL. Utiliser le prix du stop comme prix de sortie, pas le close.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card moyen">
+        <div class="issue-top">
+          <span class="issue-number">11</span>
+          <div class="issue-title-block">
+            <div class="issue-title">CVD = approximation heuristique</div>
+            <span class="issue-file">strategies/cvd_strategy.py:24-28</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          Le volume delta est approxime par <code>volume * (close - open) / (high - low)</code>. C'est une heuristique raisonnable en l'absence de donnees tick-level, mais la confidence du signal devrait refleter cette incertitude.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Appliquer un coefficient de reduction sur la confidence (ex: <code>confidence *= 0.7</code>) pour compenser l'approximation. Documenter la limitation dans la strategie.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card moyen">
+        <div class="issue-top">
+          <span class="issue-number">12</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Sharpe ratio mal annualise</div>
+            <span class="issue-file">api/bot_manager.py:215</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          <code>arr.mean() / arr.std() * (252 ** 0.5)</code> utilise le facteur 252 (jours de bourse) pour annualiser. Mais les trades arrivent toutes les 2-4 secondes en simulation &mdash; l'annualisation est incoherente et le Sharpe est surestime.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Calculer la frequence reelle des trades et utiliser <code>sqrt(N)</code> ou N est le nombre de periodes par an. Ou afficher le Sharpe non-annualise avec la mention "par trade".</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MINEUR ==================== -->
+    <section class="section" id="section-mineur">
+      <div class="section-header">
+        <span class="section-badge badge-mineur">Mineur</span>
+        <span class="section-title">Qualite de code</span>
+        <span class="section-count">3 points</span>
+      </div>
+
+      <div class="issue-card mineur">
+        <div class="issue-top">
+          <span class="issue-number">13</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Pas de tests d'integration</div>
+            <span class="issue-file">tests/</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          Les tests unitaires couvrent les strategies, le backtest et le risk manager isolement. Mais il n'y a aucun test pour les routes FastAPI, le threading du <code>BotManager</code>, ni le flux complet signal &rarr; risk &rarr; order &rarr; position.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Ajouter des tests avec <code>TestClient</code> de FastAPI pour les endpoints. Tester le flux complet avec un <code>PolymarketClient</code> mocke en mode DRY_RUN.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card mineur">
+        <div class="issue-top">
+          <span class="issue-number">14</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Imports tardifs dans les fonctions</div>
+            <span class="issue-file">api/bot_manager.py:146, 213</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          <code>import random</code> et <code>import numpy</code> sont importes dans le corps de fonctions appelees frequemment. L'overhead est negligeable (Python cache les modules) mais c'est une mauvaise pratique qui nuit a la lisibilite.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Deplacer les imports en haut du fichier, avec les autres imports du module.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="issue-card mineur">
+        <div class="issue-top">
+          <span class="issue-number">15</span>
+          <div class="issue-title-block">
+            <div class="issue-title">Pas de graceful shutdown</div>
+            <span class="issue-file">api/bot_manager.py</span>
+          </div>
+        </div>
+        <div class="issue-desc">
+          Quand le serveur est arrete (Ctrl+C), les threads daemon meurent sans cleanup. Les positions ouvertes ne sont pas sauvegardees, les ordres en cours ne sont pas annules sur Polymarket.
+        </div>
+        <div class="issue-reco">
+          <div class="reco-box">
+            <span class="reco-icon">&rarr;</span>
+            <span>Intercepter <code>SIGINT</code>/<code>SIGTERM</code> pour appeler <code>kill_all()</code> + sauvegarder l'etat dans SQLite. Utiliser l'event <code>shutdown</code> de FastAPI.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-left">Polymarket RBI Bot &middot; Audit de code v1.0</div>
+      <div class="footer-right">
+        <span class="pulse"></span>
+        Genere le 26 mars 2026 &middot; Claude Code
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+</body>
+</html>

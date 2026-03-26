@@ -1,6 +1,8 @@
 """FastAPI server — connects the dashboard to the trading bots."""
 
+import os
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 # Add project root to path
@@ -10,22 +12,36 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from api.bot_manager import BotManager
-
-app = FastAPI(title="Polymarket RBI Bot API", version="1.0.0")
-
-# CORS — allow dashboard to call API
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from data.storage import close_db
 
 # Singleton bot manager
 manager = BotManager()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup and shutdown lifecycle."""
+    yield
+    # Graceful shutdown — stop all bots, join threads, close DB
+    manager.kill_all()
+    close_db()
+
+
+app = FastAPI(title="Polymarket RBI Bot API", version="1.0.0", lifespan=lifespan)
+
+# CORS — restricted to localhost by default, configurable via CORS_ORIGINS env var
+ALLOWED_ORIGINS = os.getenv(
+    "CORS_ORIGINS", "http://localhost:1818,http://127.0.0.1:1818"
+).split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST", "PUT"],
+    allow_headers=["Content-Type"],
+)
 
 # Serve dashboard static files
 dashboard_dir = Path(__file__).parent.parent / "dashboard"
@@ -61,8 +77,8 @@ async def get_bots():
 
 
 @app.post("/api/bots/{key}/start")
-async def start_bot(key: str):
-    return manager.start_bot(key)
+async def start_bot(key: str, token_id: str = ""):
+    return manager.start_bot(key, token_id=token_id)
 
 
 @app.post("/api/bots/{key}/stop")
@@ -99,11 +115,11 @@ async def get_risk():
 # --- Settings ---
 
 class SettingsUpdate(BaseModel):
-    position_size: float | None = None
-    stop_loss_pct: float | None = None
-    take_profit_pct: float | None = None
+    position_size: float | None = Field(None, gt=0, le=1000, description="Position size in USD")
+    stop_loss_pct: float | None = Field(None, gt=0, le=100, description="Stop loss percentage (1-100)")
+    take_profit_pct: float | None = Field(None, gt=0, le=100, description="Take profit percentage (1-100)")
     dry_run: bool | None = None
-    account: str | None = None
+    account: str | None = Field(None, min_length=1, max_length=50)
 
 
 @app.get("/api/settings")

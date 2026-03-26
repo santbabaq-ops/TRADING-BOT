@@ -15,9 +15,10 @@ logger = logging.getLogger(__name__)
 class PolymarketClient:
     """Thin wrapper around py-clob-client with safety checks."""
 
-    def __init__(self, private_key: str = "", funder_address: str = ""):
+    def __init__(self, private_key: str = "", funder_address: str = "", dry_run: bool | None = None):
         self.private_key = private_key or settings.PRIVATE_KEY
         self.funder_address = funder_address or settings.FUNDER_ADDRESS
+        self.dry_run = dry_run if dry_run is not None else settings.runtime.dry_run
         self._client: Optional[ClobClient] = None
 
     def connect(self) -> None:
@@ -50,7 +51,7 @@ class PolymarketClient:
         self, token_id: str, side: str, price: float, size: float
     ) -> dict:
         """Place a limit order. Returns API response."""
-        if settings.DRY_RUN:
+        if self.dry_run:
             logger.info("[DRY RUN] %s %.2f @ %.4f on %s", side, size, price, token_id[:16])
             return {"status": "dry_run"}
 
@@ -68,7 +69,7 @@ class PolymarketClient:
 
     def cancel_all_orders(self, token_id: str) -> list[dict]:
         """Cancel all open orders for a given token."""
-        if settings.DRY_RUN:
+        if self.dry_run:
             logger.info("[DRY RUN] Cancel all orders for %s", token_id[:16])
             return []
 

@@ -25,6 +25,18 @@ class PositionTracker:
         self._positions: dict[str, Position] = {}  # key: token_id
         self._closed_pnl: list[float] = []
 
+    @staticmethod
+    def _compute_pnl(entry: float, exit_price: float, side: str, size: float) -> float:
+        """Compute realized PnL as return percentage times notional size.
+
+        For Polymarket binary outcomes (price 0-1):
+          BUY  at 0.40, exit 0.50, size $10 -> pnl = +$2.50  (25% return on $10)
+          SELL at 0.60, exit 0.50, size $10 -> pnl = +$1.67  (16.7% return on $10)
+        """
+        if side == "BUY":
+            return (exit_price - entry) / entry * size
+        return (entry - exit_price) / entry * size
+
     def open_position(
         self, token_id: str, side: str, entry_price: float, size: float, strategy: str = ""
     ) -> Position:
@@ -49,11 +61,7 @@ class PositionTracker:
             logger.warning("No open position for %s", token_id[:16])
             return None
 
-        if pos.side == "BUY":
-            pnl = (exit_price - pos.entry_price) / pos.entry_price * pos.size
-        else:
-            pnl = (pos.entry_price - exit_price) / pos.entry_price * pos.size
-
+        pnl = self._compute_pnl(pos.entry_price, exit_price, pos.side, pos.size)
         self._closed_pnl.append(pnl)
         logger.info(
             "Position closed: %s @ %.4f -> %.4f | PnL: $%.4f",
@@ -71,9 +79,7 @@ class PositionTracker:
         pos = self._positions.get(token_id)
         if pos is None:
             return 0.0
-        if pos.side == "BUY":
-            return (current_price - pos.entry_price) / pos.entry_price * pos.size
-        return (pos.entry_price - current_price) / pos.entry_price * pos.size
+        return self._compute_pnl(pos.entry_price, current_price, pos.side, pos.size)
 
     @property
     def open_positions(self) -> list[Position]:

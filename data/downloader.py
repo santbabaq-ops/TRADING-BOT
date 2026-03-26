@@ -30,7 +30,7 @@ class OHLCVDownloader:
             days_back: How many days of history to fetch
             limit: Max candles per API call
         """
-        since = int((datetime.utcnow() - timedelta(days=days_back)).timestamp() * 1000)
+        since = int((datetime.now(tz=None) - timedelta(days=days_back)).timestamp() * 1000)
         all_candles = []
 
         while True:

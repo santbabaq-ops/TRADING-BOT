@@ -2,6 +2,9 @@
 title Polymarket RBI Bot
 color 0A
 
+:: Move to project directory FIRST (handles spaces in path)
+cd /d "%~dp0"
+
 echo.
 echo  ============================================
 echo    Polymarket RBI Bot - Launcher
@@ -9,7 +12,7 @@ echo  ============================================
 echo.
 
 :: Check Python
-python --version >nul 2>&1
+where python >nul 2>&1
 if errorlevel 1 (
     echo  [ERREUR] Python non trouve. Installe Python 3.10+
     echo  https://www.python.org/downloads/
@@ -17,17 +20,19 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Move to project directory
-cd /d "%~dp0"
-
 :: Create venv if needed
 if not exist ".venv" (
     echo  [1/2] Creation de l'environnement virtuel...
     python -m venv .venv
+    if errorlevel 1 (
+        echo  [ERREUR] Impossible de creer le venv.
+        pause
+        exit /b 1
+    )
 )
 
 :: Activate venv
-call .venv\Scripts\activate.bat
+call ".venv\Scripts\activate.bat"
 echo  [OK] Environnement virtuel active.
 
 :: Always ensure dependencies are installed
@@ -40,7 +45,7 @@ if not exist ".env" (
     echo.
     echo  [ATTENTION] Fichier .env manquant.
     echo  Copie de .env.example vers .env...
-    copy .env.example .env >nul
+    copy ".env.example" ".env" >nul
     echo  Edite .env avec tes cles avant de trader en live.
     echo.
 )

@@ -44,20 +44,31 @@ class BacktestEngine:
             curr = df.iloc[i]
             price = curr["close"]
 
-            # Check stop-loss / take-profit if in position
+            # Check stop-loss / take-profit on intra-candle high/low
             if position is not None:
                 entry = position["entry_price"]
-                if position["side"] == "BUY":
-                    pnl_pct = (price - entry) / entry
-                else:
-                    pnl_pct = (entry - price) / entry
+                high = curr["high"]
+                low = curr["low"]
 
-                # Stop-loss hit
-                if pnl_pct <= -self.stop_loss_pct:
+                if position["side"] == "BUY":
+                    sl_price = entry * (1 - self.stop_loss_pct)
+                    tp_price = entry * (1 + self.take_profit_pct)
+                    sl_hit = low <= sl_price
+                    tp_hit = high >= tp_price
+                else:
+                    sl_price = entry * (1 + self.stop_loss_pct)
+                    tp_price = entry * (1 - self.take_profit_pct)
+                    sl_hit = high >= sl_price
+                    tp_hit = low <= tp_price
+
+                # If both could be hit in same candle, assume stop-loss first (conservative)
+                if sl_hit:
+                    exit_price = sl_price
+                    pnl_pct = -self.stop_loss_pct
                     pnl = pnl_pct * self.position_size - self.commission
                     trades.append({
                         "entry_price": entry,
-                        "exit_price": price,
+                        "exit_price": round(exit_price, 6),
                         "side": position["side"],
                         "size": self.position_size,
                         "pnl": pnl,
@@ -67,12 +78,13 @@ class BacktestEngine:
                     position = None
                     continue
 
-                # Take-profit hit
-                if pnl_pct >= self.take_profit_pct:
+                if tp_hit:
+                    exit_price = tp_price
+                    pnl_pct = self.take_profit_pct
                     pnl = pnl_pct * self.position_size - self.commission
                     trades.append({
                         "entry_price": entry,
-                        "exit_price": price,
+                        "exit_price": round(exit_price, 6),
                         "side": position["side"],
                         "size": self.position_size,
                         "pnl": pnl,

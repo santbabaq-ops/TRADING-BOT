@@ -54,20 +54,26 @@ class CVDStrategy(BaseStrategy):
         if pd.isna(price_slope) or pd.isna(cvd_slope):
             return TradeSignal(Signal.HOLD, price, 0.0, "indicators not ready")
 
+        # Approximation quality: doji candles (small body vs range) produce unreliable deltas
+        last_n = df.tail(self.lookback)
+        spread = (last_n["high"] - last_n["low"]).replace(0, float("nan"))
+        body_ratio = (abs(last_n["close"] - last_n["open"]) / spread).mean()
+        approx_quality = min(body_ratio / 0.5, 1.0) if not pd.isna(body_ratio) else 0.5
+
         # Bullish divergence: price falling but CVD rising -> hidden buying
         if price_slope < 0 and cvd_slope > 0:
-            confidence = min(abs(cvd_slope) / (abs(price_slope) + 1e-9), 1.0)
+            confidence = min(abs(cvd_slope) / (abs(price_slope) + 1e-9), 1.0) * approx_quality
             return TradeSignal(
                 Signal.BUY, price, confidence,
-                f"Bullish CVD divergence (price↓ cvd↑)"
+                f"Bullish CVD divergence (price down cvd up, quality: {approx_quality:.0%})"
             )
 
         # Bearish divergence: price rising but CVD falling -> hidden selling
         if price_slope > 0 and cvd_slope < 0:
-            confidence = min(abs(cvd_slope) / (abs(price_slope) + 1e-9), 1.0)
+            confidence = min(abs(cvd_slope) / (abs(price_slope) + 1e-9), 1.0) * approx_quality
             return TradeSignal(
                 Signal.SELL, price, confidence,
-                f"Bearish CVD divergence (price↑ cvd↓)"
+                f"Bearish CVD divergence (price up cvd down, quality: {approx_quality:.0%})"
             )
 
         return TradeSignal(Signal.HOLD, price, 0.0, "no divergence detected")

@@ -41,7 +41,7 @@ def main():
         funder_address=account["funder_address"],
     )
 
-    if not settings.DRY_RUN:
+    if not settings.runtime.dry_run:
         client.connect()
         logger.info("Connected to Polymarket (LIVE mode)")
     else:
@@ -50,15 +50,13 @@ def main():
     # Load strategy
     strategy = STRATEGIES[args.strategy]()
 
-    # Fetch data for indicators
+    # Setup data fetcher for live mode
     downloader = OHLCVDownloader()
-    df = downloader.fetch(symbol="BTC/USDT", timeframe="5m", days_back=7)
 
-    if df.empty:
-        logger.error("No data available")
-        sys.exit(1)
+    def fetch_data():
+        return downloader.fetch(symbol="BTC/USDT", timeframe="5m", days_back=1)
 
-    # Run trader
+    # Run trader with live data fetcher
     trader = Trader(
         strategy=strategy,
         client=client,
@@ -66,7 +64,7 @@ def main():
         position_size=args.size,
         account_name=args.account,
     )
-    trader.run_loop(df)
+    trader.run_loop(data_fetcher=fetch_data, interval_seconds=300)
 
 
 if __name__ == "__main__":

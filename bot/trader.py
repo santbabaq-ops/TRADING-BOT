@@ -2,6 +2,7 @@
 
 import logging
 import time
+from typing import Callable, Optional
 
 import pandas as pd
 
@@ -37,6 +38,9 @@ class Trader:
         self.orders = OrderManager(client)
         self.positions = PositionTracker()
         self._running = False
+
+        # Callback for trade events: on_trade(side, price, size, pnl)
+        self.on_trade: Optional[Callable[[str, float, float, float], None]] = None
 
     def execute_once(self, df: pd.DataFrame) -> None:
         """Run one cycle of the trading loop.
@@ -79,6 +83,8 @@ class Trader:
                         pnl=pnl,
                         account=self.account_name,
                     )
+                    if self.on_trade:
+                        self.on_trade(exit_side, price, pos.size, pnl)
                 has_pos = False
 
         # --- Open new position ---
@@ -102,24 +108,48 @@ class Trader:
                 token_id=self.token_id,
                 account=self.account_name,
             )
+            if self.on_trade:
+                self.on_trade(side, price, self.position_size, 0.0)
 
-    def run_loop(self, df: pd.DataFrame, interval_seconds: int = 300) -> None:
+    def run_loop(
+        self,
+        data_fetcher: Optional[Callable[[], pd.DataFrame]] = None,
+        df: Optional[pd.DataFrame] = None,
+        interval_seconds: int = 300,
+    ) -> None:
         """Continuous trading loop.
 
-        In production this would fetch new data each cycle.
-        For now, it processes existing data row by row.
+        Args:
+            data_fetcher: Callable that returns fresh OHLCV DataFrame (live mode)
+            df: Static DataFrame to replay (dev/backtest mode)
+            interval_seconds: Seconds between cycles in live mode
         """
         self._running = True
         logger.info("Starting trader: %s on %s", self.strategy.name, self.token_id[:16])
 
-        df = self.strategy.compute_indicators(df.copy())
-        min_rows = 30  # minimum history needed
-
-        for i in range(min_rows, len(df)):
-            if not self._running:
-                break
-            chunk = df.iloc[: i + 1]
-            self.execute_once(chunk)
+        if data_fetcher is not None:
+            # Live mode: fetch new data each cycle
+            while self._running:
+                try:
+                    live_df = data_fetcher()
+                    if live_df is not None and not live_df.empty:
+                        self.execute_once(live_df)
+                    else:
+                        logger.warning("No data received, retrying in %ds", interval_seconds)
+                except Exception as e:
+                    logger.error("Error in trading loop: %s", e)
+                time.sleep(interval_seconds)
+        elif df is not None:
+            # Replay mode: iterate static data (for dev/backtest)
+            df = self.strategy.compute_indicators(df.copy())
+            min_rows = 30
+            for i in range(min_rows, len(df)):
+                if not self._running:
+                    break
+                chunk = df.iloc[: i + 1]
+                self.execute_once(chunk)
+        else:
+            logger.error("No data source provided — pass data_fetcher or df")
 
         logger.info(
             "Trader stopped. Total PnL: $%.4f over %d trades",

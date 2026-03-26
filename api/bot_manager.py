@@ -1,16 +1,19 @@
 """Bot manager — runs trading bots in background threads."""
 
 import logging
+import random
 import threading
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from config import settings
 from data.polymarket_client import PolymarketClient
+from data.downloader import OHLCVDownloader
 from bot.trader import Trader
 from bot.risk_manager import RiskManager
 from strategies.macd_strategy import MACDStrategy
@@ -101,16 +104,21 @@ class BotManager:
         }
         self.risk_manager = RiskManager()
         self._settings = {
-            "position_size": settings.DEFAULT_POSITION_SIZE,
-            "stop_loss_pct": settings.STOP_LOSS_PCT * 100,
-            "take_profit_pct": settings.TAKE_PROFIT_PCT * 100,
-            "dry_run": settings.DRY_RUN,
+            "position_size": settings.runtime.default_position_size,
+            "stop_loss_pct": settings.runtime.stop_loss_pct * 100,
+            "take_profit_pct": settings.runtime.take_profit_pct * 100,
+            "dry_run": settings.runtime.dry_run,
             "account": "account_1",
         }
         self._lock = threading.Lock()
 
-    def start_bot(self, key: str, df: Optional[pd.DataFrame] = None) -> dict:
-        """Start a bot in a background thread."""
+    def start_bot(self, key: str, token_id: str = "") -> dict:
+        """Start a bot in a background thread.
+
+        Args:
+            key: Strategy key (macd, rsi, cvd)
+            token_id: Polymarket token ID. Falls back to settings, then env var.
+        """
         if key not in self.bots:
             return {"error": f"Unknown bot: {key}"}
 
@@ -118,12 +126,19 @@ class BotManager:
         if bot.running:
             return {"status": "already_running"}
 
+        # Resolve token_id: parameter > settings > env
+        resolved_token_id = token_id or settings.runtime.token_id
+        if not resolved_token_id:
+            logger.warning("No token_id configured — running in demo mode")
+            resolved_token_id = "demo"
+
         strategy_cls = STRATEGY_MAP[key]
         strategy = strategy_cls()
 
-        client = PolymarketClient()
+        dry_run = self._settings["dry_run"]
+        client = PolymarketClient(dry_run=dry_run)
         # Don't connect in dry run — no real orders
-        if not self._settings["dry_run"]:
+        if not dry_run:
             try:
                 client.connect()
             except Exception as e:
@@ -132,41 +147,52 @@ class BotManager:
         trader = Trader(
             strategy=strategy,
             client=client,
-            token_id="placeholder",
+            token_id=resolved_token_id,
             position_size=self._settings["position_size"],
             account_name=self._settings["account"],
         )
+
+        # Bridge trader events to BotState
+        def on_trade(side: str, price: float, size: float, pnl: float):
+            with self._lock:
+                bot.record_trade(side, price, size, pnl)
+                if pnl != 0:
+                    self.risk_manager.on_trade_closed(pnl)
+                else:
+                    self.risk_manager.on_trade_opened()
+
+        trader.on_trade = on_trade
 
         bot.trader = trader
         bot.running = True
         bot.started_at = datetime.now(timezone.utc).isoformat()
 
         def _run():
-            """Simulate trading loop — in production, this fetches live data."""
-            import random
-            logger.info("Bot %s started", key)
-            random.seed(time.time() + hash(key))
+            """Trading loop — fetches live data via ccxt and runs strategy."""
+            logger.info("Bot %s started (token: %s)", key, resolved_token_id[:16])
+            interval = 30  # seconds between cycles
 
-            while bot.running:
-                try:
-                    # 50% chance of trade every 2 seconds = ~1 trade every 4 sec
-                    if random.random() < 0.5:
-                        side = "BUY" if random.random() > 0.45 else "SELL"
-                        price = round(0.3 + random.random() * 0.5, 4)
-                        size = self._settings["position_size"]
-                        pnl = round((random.random() - 0.4) * size * 0.15, 4)
+            try:
+                downloader = OHLCVDownloader()
 
-                        with self._lock:
-                            bot.record_trade(side, price, size, pnl)
-                            self.risk_manager.on_trade_opened()
-                            self.risk_manager.on_trade_closed(pnl)
+                def fetch_data():
+                    return downloader.fetch(symbol="BTC/USDT", timeframe="5m", days_back=1)
 
-                    time.sleep(2)
-                except Exception as e:
-                    logger.error("Bot %s error: %s", key, e)
-                    time.sleep(2)
-
-            logger.info("Bot %s stopped", key)
+                while bot.running:
+                    try:
+                        df = fetch_data()
+                        if df is not None and not df.empty:
+                            trader.execute_once(df)
+                        else:
+                            logger.warning("Bot %s: no data, retrying...", key)
+                        time.sleep(interval)
+                    except Exception as e:
+                        logger.error("Bot %s cycle error: %s", key, e)
+                        time.sleep(interval)
+            except Exception as e:
+                logger.error("Bot %s fatal error: %s", key, e)
+            finally:
+                logger.info("Bot %s stopped", key)
 
         thread = threading.Thread(target=_run, daemon=True, name=f"bot-{key}")
         bot.thread = thread
@@ -183,6 +209,9 @@ class BotManager:
             return {"status": "already_stopped"}
 
         bot.running = False
+        if bot.thread is not None:
+            bot.thread.join(timeout=10)
+            bot.thread = None
         bot.started_at = None
         return {"status": "stopped", "bot": key}
 
@@ -190,8 +219,15 @@ class BotManager:
         stopped = []
         for key in self.bots:
             if self.bots[key].running:
-                self.stop_bot(key)
+                self.bots[key].running = False
                 stopped.append(key)
+        # Join all threads after setting flags
+        for key in stopped:
+            bot = self.bots[key]
+            if bot.thread is not None:
+                bot.thread.join(timeout=10)
+                bot.thread = None
+            bot.started_at = None
         return {"status": "killed", "bots": stopped}
 
     def get_all_bots(self) -> list[dict]:
@@ -203,18 +239,17 @@ class BotManager:
         best = max(self.bots.values(), key=lambda b: b.win_rate)
         best_name = STRATEGY_META[best.strategy_key]["name"]
 
-        # Simple Sharpe approximation
+        # Per-trade Sharpe (no annualization — trade frequency varies)
         all_pnls = []
         for b in self.bots.values():
             all_pnls.extend(
                 [t["pnl"] for t in b.trades]
             )
         if len(all_pnls) > 1:
-            import numpy as np
             arr = np.array(all_pnls)
-            sharpe = (arr.mean() / arr.std() * (252 ** 0.5)) if arr.std() > 0 else 0
+            sharpe = (arr.mean() / arr.std()) if arr.std() > 0 else 0.0
         else:
-            sharpe = 0
+            sharpe = 0.0
 
         return {
             "total_pnl": round(total_pnl, 2),
@@ -255,6 +290,9 @@ class BotManager:
         for k, v in new_settings.items():
             if k in self._settings:
                 self._settings[k] = v
-        # Apply dry_run globally
-        settings.DRY_RUN = self._settings["dry_run"]
+        # Update thread-safe runtime settings (no global mutation)
+        settings.runtime.update(
+            dry_run=self._settings["dry_run"],
+            default_position_size=self._settings["position_size"],
+        )
         return self._settings
