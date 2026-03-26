@@ -94,26 +94,17 @@ PUBLIC_PATHS = {"/api/auth/login", "/api/auth/check", "/login.html", "/docs"}
 @app.middleware("http")
 async def auth_middleware(request: Request, call_next):
     path = request.url.path
-    # Allow public paths and static files
-    if path in PUBLIC_PATHS or path.startswith("/static/"):
+    # Only protect /api/ endpoints (except auth routes)
+    if not path.startswith("/api/") or path in PUBLIC_PATHS:
         return await call_next(request)
 
-    # Check token from Authorization header or cookie
+    # Check token from Authorization header
     auth = request.headers.get("Authorization", "")
     token = auth.replace("Bearer ", "") if auth.startswith("Bearer ") else ""
-    if not token:
-        token = request.cookies.get("auth_token", "")
 
     if token and _verify_token(token):
         return await call_next(request)
 
-    # Not authenticated: redirect pages to login, return 401 for API
-    if path.startswith("/api/"):
-        return JSONResponse({"detail": "Non authentifie"}, status_code=401)
-    # Serve login page for all other requests
-    login_page = dashboard_dir / "login.html"
-    if login_page.exists():
-        return FileResponse(str(login_page))
     return JSONResponse({"detail": "Non authentifie"}, status_code=401)
 
 
@@ -125,10 +116,7 @@ class LoginRequest(BaseModel):
 @app.post("/api/auth/login")
 async def auth_login(body: LoginRequest):
     if body.username == AUTH_USERNAME and body.password == AUTH_PASSWORD:
-        token = _make_token(body.username)
-        response = JSONResponse({"token": token})
-        response.set_cookie("auth_token", token, max_age=TOKEN_EXPIRY, httponly=True, samesite="lax")
-        return response
+        return {"token": _make_token(body.username)}
     return JSONResponse({"detail": "Identifiants incorrects"}, status_code=401)
 
 

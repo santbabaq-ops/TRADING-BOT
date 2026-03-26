@@ -1127,6 +1127,12 @@ Chart.defaults.font.family = "'JetBrains Mono', monospace";
 Chart.defaults.font.size = 10;
 
 (async function init() {
+  // Auth check — redirect to login if no valid token
+  const token = localStorage.getItem('auth_token');
+  if (!token) { window.location.href = '/static/login.html'; return; }
+  const check = await fetch('/api/auth/check', { headers: { 'Authorization': 'Bearer ' + token } }).catch(() => null);
+  if (!check || !check.ok) { localStorage.removeItem('auth_token'); window.location.href = '/static/login.html'; return; }
+
   await loadI18n();
   await loadSettings();
   await refreshAll();
