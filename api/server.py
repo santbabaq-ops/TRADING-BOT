@@ -63,21 +63,24 @@ if dashboard_dir.exists():
 # ========== Auth ==========
 
 def _make_token(username: str) -> str:
-    """Create a signed token: base64url(payload).signature (cookie-safe)."""
+    """Create a signed token: base64url(payload)-signature (cookie-safe, no special chars)."""
     payload = json.dumps({"user": username, "exp": int(time.time()) + TOKEN_EXPIRY})
-    b64 = base64.urlsafe_b64encode(payload.encode()).decode()
+    b64 = base64.urlsafe_b64encode(payload.encode()).decode().rstrip("=")
     sig = hmac.new(AUTH_SECRET.encode(), b64.encode(), hashlib.sha256).hexdigest()[:32]
-    return f"{b64}.{sig}"
+    return f"{b64}-{sig}"
 
 
 def _verify_token(token: str) -> bool:
     """Verify token signature and expiry."""
     try:
-        b64, sig = token.rsplit(".", 1)
+        token = token.strip('"')
+        b64, sig = token.rsplit("-", 1)
         expected = hmac.new(AUTH_SECRET.encode(), b64.encode(), hashlib.sha256).hexdigest()[:32]
         if not hmac.compare_digest(sig, expected):
             return False
-        payload = base64.urlsafe_b64decode(b64).decode()
+        # Re-add base64 padding
+        padded = b64 + "=" * (4 - len(b64) % 4) if len(b64) % 4 else b64
+        payload = base64.urlsafe_b64decode(padded).decode()
         data = json.loads(payload)
         return data.get("exp", 0) > time.time()
     except Exception:
