@@ -354,6 +354,7 @@ tr:hover td { background: var(--bg-2); }
     <a href="/static/docs.html" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:none;padding:4px 12px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-mono);">Docs</a>
     <a href="/static/audit.html" target="_blank" style="font-size:11px;color:#ff8c38;text-decoration:none;padding:4px 12px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-mono);">Audit</a>
     <a href="/docs" target="_blank" style="font-size:11px;color:var(--text-2);text-decoration:none;padding:4px 12px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-mono);">API</a>
+    <a href="#configPanel" onclick="document.getElementById('configBody').style.display='block';document.getElementById('configToggleBtn').textContent='Fermer';loadConfig();document.getElementById('configPanel').scrollIntoView({behavior:'smooth'});" style="font-size:11px;color:var(--purple);text-decoration:none;padding:4px 12px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-mono);">Config</a>
     <div class="conn-status ok" id="connStatus">API Connected</div>
     <div class="header-time"><span id="clock">--:--:--</span></div>
   </div>
