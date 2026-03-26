@@ -504,8 +504,11 @@ function t(section, key, fallback) {
 async function api(endpoint, method = 'GET', body = null) {
   try {
     const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    const token = localStorage.getItem('auth_token');
+    if (token) opts.headers['Authorization'] = 'Bearer ' + token;
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(API_BASE + endpoint, opts);
+    if (res.status === 401) { localStorage.removeItem('auth_token'); window.location.href = '/'; return null; }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     setConnected(true);
     return await res.json();

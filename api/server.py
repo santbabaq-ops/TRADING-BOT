@@ -1,21 +1,31 @@
 """FastAPI server — connects the dashboard to the trading bots."""
 
+import hashlib
+import hmac
+import json
 import os
 import sys
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from api.bot_manager import BotManager
 from data.storage import close_db
+
+# Auth config
+AUTH_USERNAME = os.getenv("AUTH_USERNAME", "admin")
+AUTH_PASSWORD = os.getenv("AUTH_PASSWORD", "admin")
+AUTH_SECRET = os.getenv("AUTH_SECRET", "default-secret-change-me")
+TOKEN_EXPIRY = 86400  # 24h
 
 # Singleton bot manager
 manager = BotManager()
@@ -49,10 +59,81 @@ if dashboard_dir.exists():
     app.mount("/static", StaticFiles(directory=str(dashboard_dir)), name="static")
 
 
+# ========== Auth ==========
+
+def _make_token(username: str) -> str:
+    """Create a signed token: base64(payload).signature"""
+    payload = json.dumps({"user": username, "exp": int(time.time()) + TOKEN_EXPIRY})
+    sig = hmac.new(AUTH_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()[:32]
+    return f"{payload}|{sig}"
+
+
+def _verify_token(token: str) -> bool:
+    """Verify token signature and expiry."""
+    try:
+        payload, sig = token.rsplit("|", 1)
+        expected = hmac.new(AUTH_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()[:32]
+        if not hmac.compare_digest(sig, expected):
+            return False
+        data = json.loads(payload)
+        return data.get("exp", 0) > time.time()
+    except Exception:
+        return False
+
+
+# Public paths that don't require auth
+PUBLIC_PATHS = {"/api/auth/login", "/api/auth/check", "/login.html", "/docs"}
+
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    path = request.url.path
+    # Allow public paths and static files
+    if path in PUBLIC_PATHS or path.startswith("/static/"):
+        return await call_next(request)
+
+    # Check token from Authorization header
+    auth = request.headers.get("Authorization", "")
+    token = auth.replace("Bearer ", "") if auth.startswith("Bearer ") else ""
+
+    if token and _verify_token(token):
+        return await call_next(request)
+
+    # Not authenticated: redirect pages to login, return 401 for API
+    if path.startswith("/api/"):
+        return JSONResponse({"detail": "Non authentifie"}, status_code=401)
+    # Serve login page for all other requests
+    login_page = dashboard_dir / "login.html"
+    if login_page.exists():
+        return FileResponse(str(login_page))
+    return JSONResponse({"detail": "Non authentifie"}, status_code=401)
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/api/auth/login")
+async def auth_login(body: LoginRequest):
+    if body.username == AUTH_USERNAME and body.password == AUTH_PASSWORD:
+        return {"token": _make_token(body.username)}
+    return JSONResponse({"detail": "Identifiants incorrects"}, status_code=401)
+
+
+@app.get("/api/auth/check")
+async def auth_check(request: Request):
+    auth = request.headers.get("Authorization", "")
+    token = auth.replace("Bearer ", "") if auth.startswith("Bearer ") else ""
+    if _verify_token(token):
+        return {"status": "ok"}
+    return JSONResponse({"detail": "Token invalide"}, status_code=401)
+
+
 # ========== Routes ==========
 
 @app.get("/")
-async def root():
+async def root(request: Request):
     """Serve the dashboard."""
     index = dashboard_dir / "index.html"
     if index.exists():
