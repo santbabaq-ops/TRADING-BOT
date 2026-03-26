@@ -429,7 +429,145 @@ code {
 
 <!-- ==================== ETAPE 10 ==================== -->
 <div class="step">
-  <div class="step-badge red">Etape 10</div>
+  <div class="step-badge amber">Etape 10</div>
+  <h2>Configurer le fichier .env pour le Live</h2>
+
+  <p>Le fichier <code>.env</code> contient tes informations privees. Il se trouve a la racine du dossier <code>TRADING BOT</code>.</p>
+
+  <h3>Ouvrir et modifier</h3>
+  <ol class="actions">
+    <li><div class="num">1</div><div>Ouvre le fichier <code>.env</code> avec le <strong>Bloc-notes</strong> (clic droit → Ouvrir avec)</div></li>
+    <li><div class="num">2</div><div>Remplis les lignes suivantes :</div></li>
+  </ol>
+
+  <table class="tbl">
+    <thead><tr><th>Variable</th><th>C'est quoi</th><th>Exemple</th></tr></thead>
+    <tbody>
+      <tr><td><code>POLYMARKET_PRIVATE_KEY</code></td><td>Ta cle privee de wallet Polygon</td><td><code>0xabc123...</code></td></tr>
+      <tr><td><code>POLYMARKET_FUNDER_ADDRESS</code></td><td>L'adresse publique de ton wallet</td><td><code>0xdef456...</code></td></tr>
+      <tr><td><code>POLYMARKET_TOKEN_ID</code></td><td>L'identifiant du marche a trader</td><td><code>12345...</code></td></tr>
+      <tr><td><code>DRY_RUN</code></td><td>Mode simulation (<code>true</code>) ou reel (<code>false</code>)</td><td><code>false</code></td></tr>
+      <tr><td><code>MAX_POSITION_SIZE</code></td><td>Taille max par trade en $</td><td><code>10</code></td></tr>
+      <tr><td><code>MAX_DAILY_LOSS</code></td><td>Perte max par jour en $</td><td><code>50</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip red">
+    <strong>Ne partage JAMAIS ce fichier.</strong> Ta cle privee donne acces a ton wallet. Le fichier .env n'est jamais envoye sur GitHub.
+  </div>
+</div>
+
+<!-- ==================== ETAPE 11 ==================== -->
+<div class="step">
+  <div class="step-badge cyan">Etape 11</div>
+  <h2>Trouver un Token ID sur Polymarket</h2>
+
+  <p>Chaque marche Polymarket a un identifiant unique appele <strong>Token ID</strong>. C'est ce qui dit au bot <em>sur quoi</em> trader.</p>
+
+  <h3>Comment le trouver</h3>
+  <ol class="actions">
+    <li><div class="num">1</div><div>Va sur <strong>polymarket.com</strong></div></li>
+    <li><div class="num">2</div><div>Choisis un marche (ex: "Will X happen before Y?")</div></li>
+    <li><div class="num">3</div><div>Le Token ID est visible dans l'URL du marche ou via l'API CLOB</div></li>
+    <li><div class="num">4</div><div>Copie-le dans ton <code>.env</code> → ligne <code>POLYMARKET_TOKEN_ID</code></div></li>
+  </ol>
+
+  <div class="tip blue">
+    <strong>API directe :</strong> Tu peux aussi consulter <code>https://clob.polymarket.com/markets</code> pour voir la liste des marches disponibles avec leurs Token IDs.
+  </div>
+
+  <p>Tu peux aussi passer le Token ID au lancement d'un bot en <strong>ligne de commande</strong> :</p>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-def"><code>python deploy/run_bot.py --strategy macd --token-id "TON_TOKEN_ID" --size 1.0</code></span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ETAPE 12 ==================== -->
+<div class="step">
+  <div class="step-badge green">Etape 12</div>
+  <h2>Lancer en mode Live</h2>
+
+  <div class="tip red">
+    <strong>Prerequis :</strong> tu dois avoir fait au moins 2 semaines de simulation positive AVANT de passer en live.
+  </div>
+
+  <h3>Methode A — Via le dashboard (recommande)</h3>
+  <ol class="actions">
+    <li><div class="num">1</div><div>Verifie que ton <code>.env</code> est correctement rempli</div></li>
+    <li><div class="num">2</div><div>Lance <code>start.bat</code> (double-clic)</div></li>
+    <li><div class="num">3</div><div>Dans Parametres, desactive le mode <strong>Simulation</strong></div></li>
+    <li><div class="num">4</div><div>Le badge passe en <strong style="color:var(--green)">vert "Live"</strong></div></li>
+    <li><div class="num">5</div><div>Laisse la taille a <strong>$1</strong></div></li>
+    <li><div class="num">6</div><div>Clique <strong>Start</strong> sur le bot de ton choix</div></li>
+  </ol>
+
+  <h3>Methode B — En ligne de commande (un seul bot)</h3>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-def"><code>cd "C:\DEV POWERSHELL\__Q17\TRADING BOT"</code></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-def"><code>.venv\Scripts\activate</code></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-def"><code>python deploy/run_bot.py --strategy macd --token-id "TON_ID" --size 1.0</code></span>
+    </div>
+  </div>
+
+  <div class="tip blue">
+    <strong>Le bot fetch des donnees toutes les 30 secondes</strong> et execute la strategie a chaque cycle. Tu peux surveiller en temps reel dans le dashboard.
+  </div>
+</div>
+
+<!-- ==================== ETAPE 13 ==================== -->
+<div class="step">
+  <div class="step-badge purple">Etape 13</div>
+  <h2>Progression recommandee</h2>
+
+  <p>Suis cette feuille de route etape par etape. <strong>Ne saute pas d'etape.</strong></p>
+
+  <table class="tbl">
+    <thead><tr><th>Phase</th><th>Mode</th><th>Montant</th><th>Duree</th><th>Objectif</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1</strong></td><td>Simulation</td><td>$0</td><td>1-2 semaines</td><td>Comprendre les signaux, verifier que tout tourne</td></tr>
+      <tr><td><strong>2</strong></td><td>Live</td><td>$1</td><td>2 semaines</td><td>Premiers vrais trades, valider le flux reel</td></tr>
+      <tr><td><strong>3</strong></td><td>Live</td><td>$5</td><td>2 semaines</td><td>Confirmer la stabilite</td></tr>
+      <tr><td><strong>4</strong></td><td>Live</td><td>$10-50</td><td>Automatique</td><td>Le scaler monte tout seul si win rate > 55%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip green">
+    <strong>Le scaler est ton ami.</strong> Il augmente ta mise automatiquement si ca va bien, et la reduit si ca va mal (5 pertes d'affilee ou win rate < 40%). Tu n'as rien a faire.
+  </div>
+</div>
+
+<!-- ==================== ETAPE 14 ==================== -->
+<div class="step">
+  <div class="step-badge">Etape 14</div>
+  <h2>Surveillance quotidienne</h2>
+
+  <p>En mode live, verifie ton bot <strong>au moins une fois par jour</strong> :</p>
+
+  <table class="tbl">
+    <thead><tr><th>Ou regarder</th><th>Quoi verifier</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Dashboard</strong></td><td>PnL total, win rate, courbe de capital</td></tr>
+      <tr><td><strong>Gestion des risques</strong></td><td>Barre de perte journaliere — si elle est pleine, les bots sont bloques</td></tr>
+      <tr><td><strong>Journal des trades</strong></td><td>Les derniers trades ont du sens ?</td></tr>
+      <tr><td><strong>API docs</strong></td><td><code>http://localhost:1818/docs</code> pour interroger en direct</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip amber">
+    <strong>Signes d'alerte :</strong> PnL en chute libre, win rate sous 40%, plus de trades depuis longtemps. Dans ce cas → bouton rouge <strong>Tout arreter</strong>.
+  </div>
+</div>
+
+<!-- ==================== ETAPE 15 ==================== -->
+<div class="step">
+  <div class="step-badge red">Etape 15</div>
   <h2>Les 10 regles d'or</h2>
 
   <div class="tip red" style="font-size:15px; line-height: 2.2;">
