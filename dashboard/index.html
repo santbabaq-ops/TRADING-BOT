@@ -144,6 +144,54 @@ body::after {
 .bot-sparkline { padding: 8px 16px 12px; height: 60px; }
 .bot-sparkline canvas { width: 100% !important; height: 100% !important; }
 
+/* Help button on bot cards */
+.bot-help-btn {
+  width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--bg-2); color: var(--text-2); font-size: 12px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; margin-right: 8px; font-family: var(--font-sans);
+}
+.bot-help-btn:hover { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
+
+/* Strategy help modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 9999; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--bg-2); border-radius: 10px; border: 1px solid var(--border);
+  max-width: 480px; width: 90%; padding: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  animation: modalIn 0.2s ease-out;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+}
+.modal-header h3 { font-family: var(--font-sans); font-size: 17px; font-weight: 700; }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--bg-3);
+  color: var(--text-2); font-size: 16px; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all 0.2s;
+}
+.modal-close:hover { background: var(--red-dim); color: var(--red); }
+.modal-body { padding: 20px 24px 24px; font-family: var(--font-sans); font-size: 13.5px; line-height: 1.8; color: var(--text-1); }
+.modal-body strong { color: var(--text-0); }
+.modal-body .modal-tag {
+  display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+}
+.modal-body ul { margin: 10px 0; padding-left: 20px; }
+.modal-body li { margin-bottom: 8px; padding-left: 4px; }
+.modal-body li::marker { color: var(--blue); }
+.modal-header { background: var(--bg-1); }
+.modal-header h3 { display: flex; align-items: center; gap: 10px; }
+.modal-header .modal-icon {
+  width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+
 .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .metric-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; position: relative; overflow: hidden; }
 .metric-card::after { content: ''; position: absolute; top: 0; right: 0; width: 60px; height: 60px; border-radius: 0 0 0 60px; opacity: 0.05; }
@@ -305,18 +353,18 @@ tr:hover td { background: var(--bg-2); }
   <!-- CHARTS -->
   <div class="charts-row animate-in">
     <div class="panel">
-      <div class="panel-header"><div class="panel-title" title="Evolution du capital pour chaque strategie">Courbe de capital</div></div>
+      <div class="panel-header"><div class="panel-title" title="Evolution du capital pour chaque strategie">Courbe de capital</div><button class="bot-help-btn" onclick="openSectionHelp('equity_curve')">?</button></div>
       <div class="chart-container"><canvas id="equityChart"></canvas></div>
     </div>
     <div class="panel">
-      <div class="panel-header"><div class="panel-title" title="Pourcentage de trades gagnants par strategie">Taux de reussite</div></div>
+      <div class="panel-header"><div class="panel-title" title="Pourcentage de trades gagnants par strategie">Taux de reussite</div><button class="bot-help-btn" onclick="openSectionHelp('win_rate_chart')">?</button></div>
       <div class="chart-container"><canvas id="winRateChart"></canvas></div>
     </div>
   </div>
 
   <!-- RISK MANAGER -->
   <div class="panel animate-in">
-    <div class="panel-header"><div class="panel-title" title="Controles de risque — limites de perte et de positions">Gestion des risques</div></div>
+    <div class="panel-header"><div class="panel-title" title="Controles de risque — limites de perte et de positions">Gestion des risques</div><button class="bot-help-btn" onclick="openSectionHelp('risk_section')">?</button></div>
     <div class="panel-body">
       <div class="risk-grid" id="riskGrid"></div>
     </div>
@@ -326,7 +374,7 @@ tr:hover td { background: var(--bg-2); }
   <div class="bottom-row animate-in">
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Journal des trades</div>
+        <div class="panel-title">Journal des trades</div><button class="bot-help-btn" onclick="openSectionHelp('trade_log')">?</button>
         <span style="font-size: 11px; color: var(--text-2);" id="tradeCount">0 trades</span>
       </div>
       <div class="trade-table-wrap">
@@ -349,7 +397,7 @@ tr:hover td { background: var(--bg-2); }
 
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Parametres</div>
+        <div class="panel-title">Parametres</div><button class="bot-help-btn" onclick="openSectionHelp('settings_section')">?</button>
         <button class="settings-toggle" onclick="toggleSettings()">Ouvrir</button>
       </div>
       <div class="settings-body open" id="settingsBody">
@@ -462,7 +510,10 @@ function renderBots(bots) {
           <div class="bot-name">${b.name}</div>
           <div class="bot-desc">${b.desc}</div>
         </div>
-        <div class="bot-toggle ${b.running ? 'active' : ''}" onclick="toggleBot('${b.key}', ${b.running})"></div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="bot-help-btn" onclick="openStrategyHelp('${b.key}')" title="Aide sur cette strategie">?</button>
+          <div class="bot-toggle ${b.running ? 'active' : ''}" onclick="toggleBot('${b.key}', ${b.running})"></div>
+        </div>
       </div>
       <div class="bot-stats">
         <div class="bot-stat" title="${t('bots','win_rate_tooltip')}">
@@ -522,21 +573,25 @@ function renderMetrics(m) {
   const pnlColor = m.total_pnl >= 0 ? 'green' : 'red';
   el.innerHTML = `
     <div class="metric-card green" title="${t('metrics','total_pnl_tooltip')}">
+      <button class="bot-help-btn" onclick="openSectionHelp('total_pnl')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
       <div class="metric-label">${t('metrics','total_pnl')}</div>
       <div class="metric-value ${pnlColor}">${m.total_pnl >= 0 ? '+' : ''}$${m.total_pnl.toFixed(2)}</div>
       <div class="metric-sub">${t('metrics','total_pnl_sub')}</div>
     </div>
     <div class="metric-card blue" title="${t('metrics','best_strategy_tooltip')}">
+      <button class="bot-help-btn" onclick="openSectionHelp('best_strategy')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
       <div class="metric-label">${t('metrics','best_strategy')}</div>
       <div class="metric-value blue">${m.best_strategy}</div>
       <div class="metric-sub">${m.best_win_rate}% ${t('metrics','best_strategy_sub')}</div>
     </div>
     <div class="metric-card purple" title="${t('metrics','total_trades_tooltip')}">
+      <button class="bot-help-btn" onclick="openSectionHelp('total_trades')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
       <div class="metric-label">${t('metrics','total_trades')}</div>
       <div class="metric-value purple">${m.total_trades}</div>
       <div class="metric-sub">${t('metrics','total_trades_sub')}</div>
     </div>
     <div class="metric-card cyan" title="${t('metrics','sharpe_tooltip')}">
+      <button class="bot-help-btn" onclick="openSectionHelp('sharpe')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
       <div class="metric-label">${t('metrics','sharpe')}</div>
       <div class="metric-value cyan">${m.sharpe_ratio.toFixed(2)}</div>
       <div class="metric-sub">${t('metrics','sharpe_sub')}</div>
@@ -629,8 +684,8 @@ function updateWinRateChart(bots) {
 function renderRisk(r) {
   const pct = Math.min(r.daily_loss_pct, 100);
   const barClass = pct < 50 ? 'safe' : pct < 80 ? 'warning' : 'danger';
-  const botKeys = ['macd', 'rsi', 'cvd'];
-  const botLabels = ['M', 'R', 'C'];
+  const botKeys = ['macd', 'rsi', 'cvd', 'copytrade'];
+  const botLabels = ['M', 'R', 'C', 'CT'];
 
   document.getElementById('riskGrid').innerHTML = `
     <div>
@@ -749,6 +804,219 @@ async function loadSettings() {
   }
 }
 
+// ========== STRATEGY HELP ==========
+const STRATEGY_HELP = {
+  macd: {
+    title: "MACD (3/15/3)",
+    tag: "Momentum", tagColor: "#00e676", tagBg: "#00e67615",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Le MACD (Moving Average Convergence Divergence) est un indicateur de <strong>momentum</strong> qui detecte les accelerations de prix.
+<br><br>
+<strong>Comment ca marche ?</strong>
+<ul>
+<li>Calcule 2 moyennes mobiles rapides (3 et 15 periodes)</li>
+<li><strong>BUY</strong> quand la ligne MACD croise au-dessus du signal (acceleration haussiere)</li>
+<li><strong>SELL</strong> quand la ligne MACD croise en dessous du signal (acceleration baissiere)</li>
+</ul>
+<strong>Quand l'utiliser ?</strong><br>
+Marches en tendance. Moins efficace quand le marche est plat (range).
+<br><br>
+<strong>Parametres :</strong> fast=3, slow=15, signal=3 (optimises pour les mouvements courts)`
+  },
+  rsi: {
+    title: "RSI + VWAP",
+    tag: "Mean Reversion", tagColor: "#448aff", tagBg: "#448aff15",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Le RSI (Relative Strength Index) mesure si un actif est <strong>survache ou survendu</strong>. Le VWAP (Volume Weighted Average Price) donne le prix moyen pondere par le volume.
+<br><br>
+<strong>Comment ca marche ?</strong>
+<ul>
+<li>RSI sous 30 + prix sous VWAP = <strong>BUY</strong> (survente, on attend un rebond)</li>
+<li>RSI au-dessus de 70 + prix au-dessus VWAP = <strong>SELL</strong> (surachat, on attend une correction)</li>
+<li>Le bot parie que le prix revient toujours vers sa moyenne</li>
+</ul>
+<strong>Quand l'utiliser ?</strong><br>
+Marches calmes avec des oscillations regulieres. Moins bon en forte tendance.
+<br><br>
+<strong>Parametres :</strong> RSI periode=14, survente=30, surachat=70`
+  },
+  cvd: {
+    title: "CVD Divergence",
+    tag: "Volume Delta", tagColor: "#b388ff", tagBg: "#b388ff15",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Le CVD (Cumulative Volume Delta) mesure la <strong>pression acheteuse vs vendeuse</strong> reelle, au-dela du simple prix.
+<br><br>
+<strong>Comment ca marche ?</strong>
+<ul>
+<li>Si le prix <strong>baisse</strong> mais le volume d'achat <strong>augmente</strong> = achat cache → <strong>BUY</strong></li>
+<li>Si le prix <strong>monte</strong> mais le volume de vente <strong>augmente</strong> = vente cachee → <strong>SELL</strong></li>
+<li>Detecte les "divergences" entre ce que le prix montre et ce que l'argent fait vraiment</li>
+</ul>
+<strong>Quand l'utiliser ?</strong><br>
+Retournements de tendance. Le signal est plus rare mais souvent plus fiable.
+<br><br>
+<strong>Parametres :</strong> lookback=20 bougies, qualite d'approximation ponderee`
+  },
+  copytrade: {
+    title: "Copy Trading",
+    tag: "Social Trading", tagColor: "#ff9100", tagBg: "#ff910015",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Au lieu d'analyser des graphiques, cette strategie <strong>copie les meilleurs traders</strong> de Polymarket.
+<br><br>
+<strong>Comment ca marche ?</strong>
+<ul>
+<li>Scanne l'API Polymarket pour decouvrir les wallets actifs</li>
+<li>Score chaque wallet : win rate, profit factor, nombre de trades</li>
+<li>Garde les <strong>6 meilleurs</strong> (win rate >= 55%, min 20 trades)</li>
+<li>Quand un top wallet entre en position → le bot <strong>copie le trade</strong></li>
+<li>Le token_id change dynamiquement selon le marche copie</li>
+</ul>
+<strong>Quand l'utiliser ?</strong><br>
+Toujours. C'est potentiellement la strategie la plus rentable car elle suit des traders humains qui ont un vrai avantage sur les marches de prediction.
+<br><br>
+<strong>Parametres :</strong> top_n=6, min_win_rate=55%, scan toutes les 60s, rescoring toutes les heures`
+  }
+};
+
+const SECTION_HELP = {
+  total_pnl: {
+    title: "Gain/Perte total (PnL)",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Le PnL (Profit and Loss) total est la <strong>somme de tous les gains et pertes</strong> de toutes les strategies depuis le lancement.
+<br><br>
+<strong>Comment le lire ?</strong>
+<ul>
+<li><strong style="color:var(--green)">Vert (+)</strong> = tu gagnes de l'argent globalement</li>
+<li><strong style="color:var(--red)">Rouge (-)</strong> = tu perds de l'argent globalement</li>
+</ul>
+Ce chiffre inclut les 4 strategies : MACD, RSI, CVD et Copy Trading.`
+  },
+  best_strategy: {
+    title: "Meilleure strategie",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+La strategie qui a le <strong>meilleur taux de reussite</strong> (pourcentage de trades gagnants) parmi les 4.
+<br><br>
+<strong>A quoi ca sert ?</strong><br>
+Ca te permet d'identifier quelle approche fonctionne le mieux dans les conditions de marche actuelles. Tu peux desactiver les strategies moins performantes pour concentrer ton capital.`
+  },
+  total_trades: {
+    title: "Total des trades",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Le nombre total d'operations (achats + ventes) executees par tous les bots depuis le lancement.
+<br><br>
+<strong>Pourquoi c'est important ?</strong><br>
+Plus il y a de trades, plus les statistiques (win rate, Sharpe) sont fiables. Avec moins de 20 trades, les chiffres ne veulent pas dire grand-chose.`
+  },
+  sharpe: {
+    title: "Ratio de Sharpe",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Le Sharpe mesure le <strong>rendement par rapport au risque</strong>. C'est la note de performance du bot.
+<br><br>
+<strong>Comment le lire ?</strong>
+<ul>
+<li><strong>< 0</strong> = le bot perd de l'argent</li>
+<li><strong>0 a 0.5</strong> = mediocre</li>
+<li><strong>0.5 a 1</strong> = correct</li>
+<li><strong>> 1</strong> = bon</li>
+<li><strong>> 2</strong> = excellent</li>
+</ul>
+Calcule par trade (non annualise).`
+  },
+  equity_curve: {
+    title: "Courbe de capital",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Le graphique montre l'<strong>evolution du capital</strong> pour chaque strategie au fil du temps.
+<br><br>
+<strong>Comment le lire ?</strong>
+<ul>
+<li>Ligne qui <strong>monte</strong> = la strategie gagne</li>
+<li>Ligne qui <strong>descend</strong> = la strategie perd</li>
+<li>Ligne <strong>reguliere</strong> = strategie stable (bon signe)</li>
+<li>Ligne en <strong>dents de scie</strong> = strategie volatile (risquee)</li>
+</ul>`
+  },
+  win_rate_chart: {
+    title: "Taux de reussite comparatif",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Compare le <strong>pourcentage de trades gagnants</strong> de chaque strategie.
+<br><br>
+<strong>Comment le lire ?</strong>
+<ul>
+<li><strong>> 55%</strong> = la strategie est rentable (en theorie)</li>
+<li><strong>50%</strong> = la strategie est aleatoire (pile ou face)</li>
+<li><strong>< 45%</strong> = la strategie perd, a desactiver</li>
+</ul>
+Le win rate seul ne suffit pas — un win rate de 40% peut etre rentable si les gains sont gros et les pertes petites.`
+  },
+  risk_section: {
+    title: "Gestion des risques",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Les <strong>garde-fous</strong> qui empechent le bot de perdre trop d'argent.
+<br><br>
+<strong>Les 3 controles :</strong>
+<ul>
+<li><strong>Perte journaliere</strong> : si la perte du jour depasse le seuil, tous les bots sont bloques</li>
+<li><strong>Positions ouvertes</strong> : nombre max de bots qui peuvent trader en meme temps</li>
+<li><strong>Taille par bot</strong> : montant maximum par trade</li>
+</ul>
+<strong>Bouton "Tout arreter"</strong> : arret d'urgence — coupe tous les bots et annule les ordres.`
+  },
+  trade_log: {
+    title: "Journal des trades",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+La liste de <strong>tous les trades executes</strong> par les bots, du plus recent au plus ancien (50 derniers).
+<br><br>
+<strong>Colonnes :</strong>
+<ul>
+<li><strong>Heure</strong> : quand le trade a ete execute</li>
+<li><strong>Strategie</strong> : quel bot l'a fait</li>
+<li><strong>BUY/SELL</strong> : achat ou vente</li>
+<li><strong>Prix</strong> : prix d'execution</li>
+<li><strong>Taille</strong> : montant en $</li>
+<li><strong>PnL</strong> : gain (+) ou perte (-) sur ce trade</li>
+</ul>
+Clique sur un titre de colonne pour trier.`
+  },
+  settings_section: {
+    title: "Parametres",
+    body: `<strong>Qu'est-ce que c'est ?</strong><br>
+Les reglages qui controlent le comportement de tous les bots.
+<br><br>
+<strong>Parametres :</strong>
+<ul>
+<li><strong>Taille de position</strong> : combien de $ par trade (defaut : $1)</li>
+<li><strong>Stop Loss %</strong> : fermeture automatique si perte > X% (defaut : 5%)</li>
+<li><strong>Take Profit %</strong> : prise de profit si gain > X% (defaut : 10%)</li>
+<li><strong>Mode</strong> : Simulation (faux argent) ou Live (vrai argent)</li>
+<li><strong>Compte</strong> : quel wallet Polymarket utiliser</li>
+</ul>
+<strong>Conseil :</strong> ne change rien au debut. Laisse les valeurs par defaut.`
+  }
+};
+
+function openSectionHelp(key) {
+  const info = SECTION_HELP[key];
+  if (!info) return;
+  document.getElementById('modalTitle').innerHTML = `<span class="modal-icon" style="background:var(--blue-dim);color:var(--blue);">?</span> ${info.title}`;
+  document.getElementById('modalBody').innerHTML = info.body;
+  document.getElementById('strategyModal').classList.add('show');
+}
+
+function openStrategyHelp(key) {
+  const info = STRATEGY_HELP[key];
+  if (!info) return;
+  document.getElementById('modalTitle').innerHTML = `<span class="modal-icon" style="background:${info.tagBg};color:${info.tagColor};">S</span> ${info.title}`;
+  document.getElementById('modalBody').innerHTML =
+    `<span class="modal-tag" style="color:${info.tagColor};background:${info.tagBg};border:1px solid ${info.tagColor}30">${info.tag}</span><br>` + info.body;
+  document.getElementById('strategyModal').classList.add('show');
+}
+
+function closeStrategyHelp() {
+  document.getElementById('strategyModal').classList.remove('show');
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeStrategyHelp(); });
+
 // ========== MAIN REFRESH LOOP ==========
 async function refreshAll() {
   const [bots, metrics, trades, risk] = await Promise.all([
@@ -785,6 +1053,17 @@ Chart.defaults.font.size = 10;
   setInterval(refreshAll, POLL_INTERVAL);
 })();
 </script>
+
+<!-- Strategy help modal -->
+<div class="modal-overlay" id="strategyModal" onclick="if(event.target===this)closeStrategyHelp()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle"></h3>
+      <button class="modal-close" onclick="closeStrategyHelp()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
 
 </body>
 </html>
