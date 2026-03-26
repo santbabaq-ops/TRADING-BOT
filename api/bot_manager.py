@@ -20,6 +20,8 @@ from incubation.alerter import Alerter
 from strategies.macd_strategy import MACDStrategy
 from strategies.rsi_mean_reversion import RSIMeanReversionStrategy
 from strategies.cvd_strategy import CVDStrategy
+from strategies.base_strategy import Signal
+from strategies.copytrade_strategy import CopyTradeStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +29,14 @@ STRATEGY_MAP = {
     "macd": MACDStrategy,
     "rsi": RSIMeanReversionStrategy,
     "cvd": CVDStrategy,
+    "copytrade": CopyTradeStrategy,
 }
 
 STRATEGY_META = {
     "macd": {"name": "MACD (3/15/3)", "desc": "Momentum · Trend Following", "color": "#00e676"},
     "rsi": {"name": "RSI + VWAP", "desc": "Mean Reversion · Counter-Trend", "color": "#448aff"},
     "cvd": {"name": "CVD Divergence", "desc": "Volume Delta · Reversal Detection", "color": "#b388ff"},
+    "copytrade": {"name": "Copy Trading", "desc": "Top Wallets · Signal Mirroring", "color": "#ff9100"},
 }
 
 
@@ -102,6 +106,7 @@ class BotManager:
             "macd": BotState(strategy_key="macd"),
             "rsi": BotState(strategy_key="rsi"),
             "cvd": BotState(strategy_key="cvd"),
+            "copytrade": BotState(strategy_key="copytrade"),
         }
         self.risk_manager = RiskManager()
         self.alerter = Alerter(
@@ -183,6 +188,11 @@ class BotManager:
             """Trading loop — demo mode or live data via ccxt."""
             logger.info("Bot %s started (%s)", key, "demo" if is_demo else resolved_token_id[:16])
 
+            DEMO_MARKETS = [
+                "US Election 2026", "Fed Rate Cut", "Bitcoin 100k",
+                "Trump Approval >50%", "Gold >3500", "S&P 500 ATH",
+            ]
+
             if is_demo:
                 # Demo mode: simulated trades for dashboard preview
                 random.seed(time.time() + hash(key))
@@ -201,6 +211,33 @@ class BotManager:
                     except Exception as e:
                         logger.error("Bot %s error: %s", key, e)
                         time.sleep(2)
+
+            elif key == "copytrade":
+                # Copy-trade mode: scan wallets, detect signals, execute
+                interval = settings.COPYTRADE_SCAN_INTERVAL
+                try:
+                    while bot.running:
+                        try:
+                            signal = strategy.generate_signal(pd.DataFrame())
+                            if signal.signal != Signal.HOLD and strategy._last_signals:
+                                for sig in strategy._last_signals:
+                                    # Update token_id dynamically
+                                    trader.token_id = sig.token_id
+                                    dummy_df = pd.DataFrame({
+                                        "close": [sig.price], "open": [sig.price],
+                                        "high": [sig.price], "low": [sig.price],
+                                        "volume": [0], "timestamp": [pd.Timestamp.now()],
+                                    })
+                                    trader.execute_once(dummy_df)
+                                    strategy.mark_copied(sig)
+                            time.sleep(interval)
+                        except Exception as e:
+                            logger.error("Bot %s cycle error: %s", key, e)
+                            time.sleep(interval)
+                except Exception as e:
+                    logger.error("Bot %s fatal error: %s", key, e)
+                    self.alerter.notify_bot_error(key, str(e))
+
             else:
                 # Live mode: fetch real data via ccxt
                 interval = 30

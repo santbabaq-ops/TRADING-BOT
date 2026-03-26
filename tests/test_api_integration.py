@@ -26,13 +26,13 @@ client = TestClient(app)
 
 
 class TestBotAPI:
-    def test_get_bots_returns_3(self):
+    def test_get_bots_returns_4(self):
         resp = client.get("/api/bots")
         assert resp.status_code == 200
         bots = resp.json()
-        assert len(bots) == 3
+        assert len(bots) == 4
         keys = {b["key"] for b in bots}
-        assert keys == {"macd", "rsi", "cvd"}
+        assert keys == {"macd", "rsi", "cvd", "copytrade"}
 
     def test_start_and_stop_bot(self):
         resp = client.post("/api/bots/macd/start")

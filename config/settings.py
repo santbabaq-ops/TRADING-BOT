@@ -43,6 +43,13 @@ RSI_OVERBOUGHT = 70
 
 CVD_LOOKBACK = 20
 
+# --- Copy-Trading defaults ---
+COPYTRADE_MIN_TRADES = int(os.getenv("COPYTRADE_MIN_TRADES", "20"))
+COPYTRADE_MIN_WIN_RATE = float(os.getenv("COPYTRADE_MIN_WIN_RATE", "0.55"))
+COPYTRADE_TOP_N = int(os.getenv("COPYTRADE_TOP_N", "6"))
+COPYTRADE_SCAN_INTERVAL = int(os.getenv("COPYTRADE_SCAN_INTERVAL", "60"))
+COPYTRADE_RESCORE_INTERVAL = int(os.getenv("COPYTRADE_RESCORE_INTERVAL", "3600"))
+
 
 @dataclass
 class Settings:

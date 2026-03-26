@@ -25,7 +25,7 @@
   "metrics": {
     "total_pnl": "Gain/Perte total",
     "total_pnl_tooltip": "Somme des gains et pertes de toutes les strategies",
-    "total_pnl_sub": "Sur les 3 strategies",
+    "total_pnl_sub": "Sur les 4 strategies",
     "best_strategy": "Meilleure strategie",
     "best_strategy_tooltip": "La strategie avec le meilleur taux de reussite",
     "best_strategy_sub": "de reussite",
@@ -34,7 +34,7 @@
     "total_trades_sub": "Depuis le debut",
     "sharpe": "Ratio de Sharpe",
     "sharpe_tooltip": "Mesure le rendement ajuste au risque. Au-dessus de 1 = bon, au-dessus de 2 = excellent",
-    "sharpe_sub": "Annualise"
+    "sharpe_sub": "Par trade"
   },
   "charts": {
     "equity_curve": "Courbe de capital",
@@ -49,7 +49,7 @@
     "daily_loss": "Limite de perte journaliere",
     "daily_loss_tooltip": "Perte maximale autorisee sur une journee — les bots s'arretent si cette limite est atteinte",
     "open_positions": "Positions ouvertes",
-    "open_positions_tooltip": "Nombre de bots actuellement en position. M=MACD, R=RSI, C=CVD",
+    "open_positions_tooltip": "Nombre de bots actuellement en position. M=MACD, R=RSI, C=CVD, CT=Copy Trading",
     "position_size": "Taille par bot",
     "position_size_tooltip": "Montant investi par trade pour chaque bot",
     "kill_all": "Tout arreter",
