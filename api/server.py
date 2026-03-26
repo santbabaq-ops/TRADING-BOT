@@ -92,9 +92,11 @@ async def auth_middleware(request: Request, call_next):
     if path in PUBLIC_PATHS or path.startswith("/static/"):
         return await call_next(request)
 
-    # Check token from Authorization header
+    # Check token from Authorization header or cookie
     auth = request.headers.get("Authorization", "")
     token = auth.replace("Bearer ", "") if auth.startswith("Bearer ") else ""
+    if not token:
+        token = request.cookies.get("auth_token", "")
 
     if token and _verify_token(token):
         return await call_next(request)
@@ -117,7 +119,10 @@ class LoginRequest(BaseModel):
 @app.post("/api/auth/login")
 async def auth_login(body: LoginRequest):
     if body.username == AUTH_USERNAME and body.password == AUTH_PASSWORD:
-        return {"token": _make_token(body.username)}
+        token = _make_token(body.username)
+        response = JSONResponse({"token": token})
+        response.set_cookie("auth_token", token, max_age=TOKEN_EXPIRY, httponly=True, samesite="lax")
+        return response
     return JSONResponse({"detail": "Identifiants incorrects"}, status_code=401)
 
 
