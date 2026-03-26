@@ -1,5 +1,6 @@
 """FastAPI server — connects the dashboard to the trading bots."""
 
+import base64
 import hashlib
 import hmac
 import json
@@ -62,19 +63,21 @@ if dashboard_dir.exists():
 # ========== Auth ==========
 
 def _make_token(username: str) -> str:
-    """Create a signed token: base64(payload).signature"""
+    """Create a signed token: base64url(payload).signature (cookie-safe)."""
     payload = json.dumps({"user": username, "exp": int(time.time()) + TOKEN_EXPIRY})
-    sig = hmac.new(AUTH_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()[:32]
-    return f"{payload}|{sig}"
+    b64 = base64.urlsafe_b64encode(payload.encode()).decode()
+    sig = hmac.new(AUTH_SECRET.encode(), b64.encode(), hashlib.sha256).hexdigest()[:32]
+    return f"{b64}.{sig}"
 
 
 def _verify_token(token: str) -> bool:
     """Verify token signature and expiry."""
     try:
-        payload, sig = token.rsplit("|", 1)
-        expected = hmac.new(AUTH_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()[:32]
+        b64, sig = token.rsplit(".", 1)
+        expected = hmac.new(AUTH_SECRET.encode(), b64.encode(), hashlib.sha256).hexdigest()[:32]
         if not hmac.compare_digest(sig, expected):
             return False
+        payload = base64.urlsafe_b64decode(b64).decode()
         data = json.loads(payload)
         return data.get("exp", 0) > time.time()
     except Exception:
