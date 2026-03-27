@@ -429,6 +429,13 @@ tr:hover td { background: var(--bg-2); }
       <div class="settings-body open" id="settingsBody">
         <div class="settings-grid" style="grid-template-columns: 1fr;">
           <div class="setting-group">
+            <label title="Simulation = aucun vrai ordre. Live = ordres reels sur Polymarket">Mode</label>
+            <div class="dry-run-toggle">
+              <div class="bot-toggle active" id="dryRunToggle" onclick="toggleDryRun()" title="Activer/desactiver le mode simulation"></div>
+              <span class="dry-run-label" id="dryRunLabel">Simulation</span>
+            </div>
+          </div>
+          <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
             <label title="Montant en dollars investi par transaction">Taille de position : <span id="sizeVal">$1.00</span></label>
             <input type="range" class="setting-slider" id="settingSize" min="1" max="100" value="1"
                    oninput="onSettingChange()" title="Glisser pour ajuster la taille de chaque position">
@@ -464,13 +471,6 @@ tr:hover td { background: var(--bg-2); }
             <label title="Vend si le prix recule de ce pourcentage depuis le sommet">Distance trailing %</label>
             <input type="number" class="setting-input" id="settingTrailDist" value="15" min="5" max="50" step="5"
                    onchange="onSettingChange()" title="Ex: 15 = vente si -15% du plus haut">
-          </div>
-          <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
-            <label title="Simulation = aucun vrai ordre. Live = ordres reels sur Polymarket">Mode</label>
-            <div class="dry-run-toggle">
-              <div class="bot-toggle active" id="dryRunToggle" onclick="toggleDryRun()" title="Activer/desactiver le mode simulation"></div>
-              <span class="dry-run-label" id="dryRunLabel">Simulation</span>
-            </div>
           </div>
         </div>
       </div>
