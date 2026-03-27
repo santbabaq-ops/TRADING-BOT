@@ -63,6 +63,10 @@ class Settings:
     max_open_positions: int = 3
     stop_loss_pct: float = 0.05
     take_profit_pct: float = 0.10
+    risk_per_trade_pct: float = 0.01
+    trailing_tp_enabled: bool = False
+    trailing_tp_activation: float = 0.30
+    trailing_tp_distance: float = 0.15
     log_level: str = "INFO"
     token_id: str = ""
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
@@ -86,6 +90,10 @@ class Settings:
                 "max_open_positions": self.max_open_positions,
                 "stop_loss_pct": self.stop_loss_pct,
                 "take_profit_pct": self.take_profit_pct,
+                "risk_per_trade_pct": self.risk_per_trade_pct,
+                "trailing_tp_enabled": self.trailing_tp_enabled,
+                "trailing_tp_activation": self.trailing_tp_activation,
+                "trailing_tp_distance": self.trailing_tp_distance,
                 "log_level": self.log_level,
                 "token_id": self.token_id,
             }
@@ -98,6 +106,10 @@ runtime = Settings(
     max_position_size=float(os.getenv("MAX_POSITION_SIZE", "10")),
     max_daily_loss=float(os.getenv("MAX_DAILY_LOSS", "50")),
     max_open_positions=int(os.getenv("MAX_OPEN_POSITIONS", "3")),
+    risk_per_trade_pct=float(os.getenv("RISK_PER_TRADE_PCT", "0.01")),
+    trailing_tp_enabled=os.getenv("TRAILING_TP_ENABLED", "false").lower() == "true",
+    trailing_tp_activation=float(os.getenv("TRAILING_TP_ACTIVATION", "0.30")),
+    trailing_tp_distance=float(os.getenv("TRAILING_TP_DISTANCE", "0.15")),
     log_level=os.getenv("LOG_LEVEL", "INFO"),
     token_id=os.getenv("POLYMARKET_TOKEN_ID", ""),
 )

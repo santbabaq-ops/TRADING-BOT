@@ -17,6 +17,7 @@ from data.downloader import OHLCVDownloader
 from bot.trader import Trader
 from bot.risk_manager import RiskManager
 from incubation.alerter import Alerter
+from incubation.scaler import Scaler
 from incubation.logger import setup_logging, log_trade_event
 from strategies.macd_strategy import MACDStrategy
 from strategies.rsi_mean_reversion import RSIMeanReversionStrategy
@@ -162,12 +163,15 @@ class BotManager:
             except Exception as e:
                 return {"error": f"Connection failed: {e}"}
 
+        scaler = Scaler(alerter=self.alerter)
+
         trader = Trader(
             strategy=strategy,
             client=client,
             token_id=resolved_token_id,
             position_size=self._settings["position_size"],
             account_name=self._settings["account"],
+            scaler=scaler,
         )
 
         # Bridge trader events to BotState

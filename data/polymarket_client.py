@@ -3,6 +3,7 @@
 import logging
 from typing import Optional
 
+import requests
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import OrderArgs, OrderType
 from py_clob_client.order_builder.constants import BUY, SELL
@@ -10,6 +11,10 @@ from py_clob_client.order_builder.constants import BUY, SELL
 from config import settings
 
 logger = logging.getLogger(__name__)
+
+# Polygon USDC contract (6 decimals)
+_USDC_CONTRACT = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+_POLYGON_RPC = "https://polygon-rpc.com"
 
 
 class PolymarketClient:
@@ -95,3 +100,35 @@ class PolymarketClient:
         best_bid = float(bids[0]["price"])
         best_ask = float(asks[0]["price"])
         return (best_bid + best_ask) / 2
+
+    def get_balance(self) -> float:
+        """Get USDC balance of the funder wallet on Polygon.
+
+        Returns balance in USDC (float). Returns 0.0 on error.
+        """
+        if not self.funder_address:
+            logger.warning("No funder address configured — cannot fetch balance")
+            return 0.0
+
+        # ERC-20 balanceOf(address) selector
+        data = (
+            "0x70a08231"
+            "000000000000000000000000"
+            + self.funder_address.lower().replace("0x", "")
+        )
+        payload = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "eth_call",
+            "params": [{"to": _USDC_CONTRACT, "data": data}, "latest"],
+        }
+        try:
+            resp = requests.post(_POLYGON_RPC, json=payload, timeout=10)
+            result = resp.json().get("result", "0x0")
+            raw = int(result, 16)
+            balance = raw / 1e6  # USDC has 6 decimals
+            logger.info("Wallet USDC balance: $%.2f", balance)
+            return balance
+        except Exception as e:
+            logger.error("Failed to fetch USDC balance: %s", e)
+            return 0.0

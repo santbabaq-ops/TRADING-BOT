@@ -588,6 +588,341 @@ code {
   </div>
 </div>
 
+<!-- ==================== GESTION DU RISQUE ==================== -->
+<div class="divider"></div>
+<div class="hero" style="padding: 24px 0 32px;">
+  <h1>Gestion du risque : tout comprendre</h1>
+  <p>Les mecanismes qui protegent ton capital automatiquement.</p>
+</div>
+
+<!-- ==================== RISQUE 1-2% ==================== -->
+<div class="step" id="risk-percent">
+  <div class="step-badge red">Risque</div>
+  <h2>Regle du 1-2% par trade</h2>
+
+  <p>C'est la regle la plus importante en trading. Elle dit : <strong>ne jamais risquer plus de 1 a 2% de ton capital total sur un seul trade</strong>.</p>
+
+  <h3>Exemple concret</h3>
+  <table class="tbl">
+    <thead><tr><th>Capital</th><th>Risque 1%</th><th>Risque 2%</th></tr></thead>
+    <tbody>
+      <tr><td>500 USDC</td><td>5 USDC max de perte</td><td>10 USDC max de perte</td></tr>
+      <tr><td>1 000 USDC</td><td>10 USDC max de perte</td><td>20 USDC max de perte</td></tr>
+      <tr><td>5 000 USDC</td><td>50 USDC max de perte</td><td>100 USDC max de perte</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Pourquoi c'est vital</h3>
+  <table class="tbl">
+    <thead><tr><th>Scenario</th><th>Sans regle (10%/trade)</th><th>Avec regle 1%</th></tr></thead>
+    <tbody>
+      <tr><td>5 pertes d'affilee</td><td><strong style="color:var(--red)">-50% du capital</strong></td><td>-5% du capital</td></tr>
+      <tr><td>10 pertes d'affilee</td><td><strong style="color:var(--red)">Quasi ruine</strong></td><td>-10% du capital</td></tr>
+      <tr><td>Mauvaise serie</td><td>Impossible de revenir</td><td><strong style="color:var(--green)">Tu restes en vie</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Comment le bot calcule</h3>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-word">Formule</span>
+      <span class="vocab-def"><code>taille = (capital x risk%) / (prix x stop_loss%)</code></span>
+    </div>
+  </div>
+
+  <p>Exemple : capital = 1000 USDC, risque = 1%, prix d'achat = 0,60 $, stop-loss = 40%</p>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-word">Calcul</span>
+      <span class="vocab-def"><code>perte_max = 1000 x 0.01 = 10 USDC</code></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word"></span>
+      <span class="vocab-def"><code>perte_par_part = 0.60 x 0.40 = 0.24 USDC</code></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word"></span>
+      <span class="vocab-def"><code>nb_parts = 10 / 0.24 = 41 parts</code></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word"></span>
+      <span class="vocab-def"><code>mise_totale = 41 x 0.60 = 25 USDC</code> (mais tu ne risques que 10 USDC)</span>
+    </div>
+  </div>
+
+  <div class="tip green">
+    <strong>Le bot fait ce calcul automatiquement</strong> a chaque trade. Il recupere ton solde USDC en temps reel et ajuste la taille de position. Tu n'as rien a calculer.
+  </div>
+
+  <h3>Reglage</h3>
+  <table class="tbl">
+    <thead><tr><th>Variable .env</th><th>Valeur</th><th>Signification</th></tr></thead>
+    <tbody>
+      <tr><td><code>RISK_PER_TRADE_PCT</code></td><td><code>0.01</code></td><td>1% du capital par trade (recommande)</td></tr>
+      <tr><td><code>RISK_PER_TRADE_PCT</code></td><td><code>0.02</code></td><td>2% du capital par trade (maximum)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip red">
+    <strong>Ne depasse jamais 2%.</strong> Meme si tu es confiant. C'est cette regle qui separe les traders qui survivent de ceux qui perdent tout.
+  </div>
+</div>
+
+<!-- ==================== STOP-LOSS ==================== -->
+<div class="step" id="stop-loss">
+  <div class="step-badge red">Protection</div>
+  <h2>Stop-Loss : le filet de securite</h2>
+
+  <p>Le stop-loss est un <strong>ordre automatique qui ferme ta position quand la perte atteint un seuil</strong>. C'est ton assurance vie en trading.</p>
+
+  <h3>Comment ca marche</h3>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-word">Achat a 0,55$</span>
+      <span class="vocab-def">Stop-loss a 40% → le bot vend si le prix descend a <strong>0,33 $</strong></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Sans SL</span>
+      <span class="vocab-def">Si le prix tombe a 0,05 $ → tu perds <strong>91%</strong> de ta mise</span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Avec SL 40%</span>
+      <span class="vocab-def">Perte limitee a <strong>40%</strong> de ta mise, puis le bot sort</span>
+    </div>
+  </div>
+
+  <h3>Exemple chiffre</h3>
+  <table class="tbl">
+    <thead><tr><th>Mise</th><th>Prix d'achat</th><th>Stop-Loss 40%</th><th>Perte max</th></tr></thead>
+    <tbody>
+      <tr><td>10 USDC</td><td>0,55 $</td><td>0,33 $</td><td><strong>4 USDC</strong> (au lieu de 10)</td></tr>
+      <tr><td>25 USDC</td><td>0,70 $</td><td>0,42 $</td><td><strong>10 USDC</strong> (au lieu de 25)</td></tr>
+      <tr><td>50 USDC</td><td>0,60 $</td><td>0,36 $</td><td><strong>20 USDC</strong> (au lieu de 50)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip blue">
+    <strong>Le bot verifie le stop-loss a chaque cycle</strong> (toutes les 30 secondes). Si le prix franchit le seuil, il vend immediatement sans attendre de signal de la strategie.
+  </div>
+
+  <h3>Reglage recommande</h3>
+  <table class="tbl">
+    <thead><tr><th>Type de marche</th><th>Stop-Loss</th><th>Pourquoi</th></tr></thead>
+    <tbody>
+      <tr><td>Marche calme</td><td>20-30%</td><td>Moins de volatilite, SL serre</td></tr>
+      <tr><td>Marche normal</td><td>30-40%</td><td>Bon compromis (defaut du bot)</td></tr>
+      <tr><td>Marche volatil</td><td>40-50%</td><td>Evite les faux signaux de sortie</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ==================== TAKE-PROFIT ==================== -->
+<div class="step" id="take-profit">
+  <div class="step-badge green">Gain</div>
+  <h2>Take-Profit : securiser les gains</h2>
+
+  <p>Le take-profit est l'inverse du stop-loss : <strong>il vend automatiquement quand ton gain atteint un seuil</strong>. Sans ca, tu risques de voir tes gains fondre si le marche retourne.</p>
+
+  <h3>Exemple</h3>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-word">Achat a 0,55$</span>
+      <span class="vocab-def">Take-profit a 60% → le bot vend quand le prix atteint <strong>0,88 $</strong></span>
+    </div>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>Mise</th><th>Prix d'achat</th><th>TP 60%</th><th>Gain encaisse</th></tr></thead>
+    <tbody>
+      <tr><td>10 USDC</td><td>0,55 $</td><td>0,88 $</td><td><strong>+6 USDC</strong></td></tr>
+      <tr><td>25 USDC</td><td>0,40 $</td><td>0,64 $</td><td><strong>+15 USDC</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Risk-Reward Ratio</h3>
+  <p>Le ratio entre ton take-profit et ton stop-loss doit etre <strong>au minimum 1:1,5</strong>. Ca veut dire : pour chaque 1$ risque, tu vises au moins 1,50$ de gain.</p>
+
+  <table class="tbl">
+    <thead><tr><th>Stop-Loss</th><th>Take-Profit minimum</th><th>Ratio</th></tr></thead>
+    <tbody>
+      <tr><td>5%</td><td>7,5%</td><td>1:1,5</td></tr>
+      <tr><td>30%</td><td>45%</td><td>1:1,5</td></tr>
+      <tr><td>40%</td><td>60%</td><td>1:1,5</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip amber">
+    <strong>Meme avec un win rate de 40%</strong>, un bon ratio risk/reward permet d'etre rentable. C'est la mathematique du trading.
+  </div>
+</div>
+
+<!-- ==================== TRAILING TAKE-PROFIT ==================== -->
+<div class="step" id="trailing-tp">
+  <div class="step-badge purple">Avance</div>
+  <h2>Trailing Take-Profit : laisser courir les gains</h2>
+
+  <p>Le trailing TP est une version <strong>intelligente</strong> du take-profit classique. Au lieu de vendre a un prix fixe, il <strong>suit le prix</strong> quand il monte et ne vend que quand le prix redescend.</p>
+
+  <h3>Comment ca marche (en 4 temps)</h3>
+  <ol class="actions">
+    <li><div class="num">1</div><div>Tu achetes a 0,55 $. Le trailing TP est configure a : activation +30%, distance 15%.</div></li>
+    <li><div class="num">2</div><div>Le prix monte a 0,72 $ (+31%) → <strong>le trailing s'active</strong>. Le seuil de vente se place a 0,72 - 15% = <strong>0,612 $</strong>.</div></li>
+    <li><div class="num">3</div><div>Le prix continue a monter jusqu'a 0,90 $ → le seuil <strong>suit</strong> et monte a 0,90 - 15% = <strong>0,765 $</strong>.</div></li>
+    <li><div class="num">4</div><div>Le prix redescend et touche 0,765 $ → <strong>le bot vend</strong>. Tu as gagne 0,765 - 0,55 = <strong>+0,215 $/part</strong> au lieu de seulement 0,088 $/part avec un TP fixe a +60%.</div></li>
+  </ol>
+
+  <h3>Comparaison visuelle</h3>
+  <table class="tbl">
+    <thead><tr><th></th><th>TP Fixe (+60%)</th><th>Trailing TP</th></tr></thead>
+    <tbody>
+      <tr><td>Prix de vente</td><td>0,88 $ (fixe)</td><td>0,765 $ (suit le mouvement)</td></tr>
+      <tr><td>Si le prix monte a 0,95 $</td><td>Deja vendu a 0,88 $</td><td><strong>Encore en position, seuil a 0,808 $</strong></td></tr>
+      <tr><td>Avantage</td><td>Simple, previsible</td><td><strong>Capture les grands mouvements</strong></td></tr>
+      <tr><td>Inconvenient</td><td>Rate les grands mouvements</td><td>Peut sortir un peu sous le sommet</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Reglages</h3>
+  <table class="tbl">
+    <thead><tr><th>Variable .env</th><th>Defaut</th><th>Signification</th></tr></thead>
+    <tbody>
+      <tr><td><code>TRAILING_TP_ENABLED</code></td><td><code>false</code></td><td>Active/desactive le trailing TP</td></tr>
+      <tr><td><code>TRAILING_TP_ACTIVATION</code></td><td><code>0.30</code></td><td>Le trailing demarre apres +30% de gain</td></tr>
+      <tr><td><code>TRAILING_TP_DISTANCE</code></td><td><code>0.15</code></td><td>Vend si le prix recule de 15% depuis le sommet</td></tr>
+    </tbody>
+  </table>
+
+  <div class="tip blue">
+    <strong>Quand le trailing est actif, le take-profit fixe est desactive.</strong> Les deux ne fonctionnent pas en meme temps. Le bot utilise l'un ou l'autre.
+  </div>
+
+  <div class="tip amber">
+    <strong>Recommandation :</strong> Commence avec le TP fixe (plus simple). Active le trailing une fois que tu comprends bien le comportement de tes strategies.
+  </div>
+</div>
+
+<!-- ==================== SIZING DYNAMIQUE ==================== -->
+<div class="step" id="dynamic-sizing">
+  <div class="step-badge cyan">Calcul</div>
+  <h2>Taille de position dynamique</h2>
+
+  <p>Le bot <strong>ne met jamais un montant fixe</strong> sur chaque trade. Il calcule automatiquement la taille optimale en combinant :</p>
+
+  <ol class="actions">
+    <li><div class="num">1</div><div><strong>Ton capital</strong> — il recupere ton solde USDC en temps reel sur Polygon</div></li>
+    <li><div class="num">2</div><div><strong>Ton risque max</strong> — 1 ou 2% de ce capital (reglable)</div></li>
+    <li><div class="num">3</div><div><strong>Le stop-loss</strong> — pour savoir combien tu perds par part si ca tourne mal</div></li>
+    <li><div class="num">4</div><div><strong>Le plafond du scaler</strong> — le systeme d'incubation limite aussi la taille max</div></li>
+  </ol>
+
+  <h3>Exemple complet</h3>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-word">Capital</span>
+      <span class="vocab-def">2 000 USDC</span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Risque</span>
+      <span class="vocab-def">1% → perte max autorisee = <strong>20 USDC</strong></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Prix d'achat</span>
+      <span class="vocab-def">0,60 $ par part</span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Stop-Loss</span>
+      <span class="vocab-def">40% → perte par part = 0,60 x 0,40 = <strong>0,24 $</strong></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Nb parts</span>
+      <span class="vocab-def">20 / 0,24 = <strong>83 parts</strong></span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Mise totale</span>
+      <span class="vocab-def">83 x 0,60 = <strong>50 USDC</strong> (mais perte max = 20 USDC)</span>
+    </div>
+  </div>
+
+  <div class="tip green">
+    <strong>Si ton capital baisse, la taille diminue automatiquement.</strong> Si ton capital monte, la taille augmente. C'est de l'auto-regulation.
+  </div>
+</div>
+
+<!-- ==================== INCUBATION / SCALER ==================== -->
+<div class="step" id="incubation">
+  <div class="step-badge amber">Incubation</div>
+  <h2>Systeme d'incubation (Scaler)</h2>
+
+  <p>Le scaler est un <strong>systeme de progression automatique</strong> qui monte ou descend ta mise en fonction de tes resultats reels.</p>
+
+  <h3>L'echelle de progression</h3>
+  <table class="tbl">
+    <thead><tr><th>Niveau</th><th>Mise max</th><th>Condition pour monter</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1</strong></td><td>$1</td><td>Debut — toujours commencer ici</td></tr>
+      <tr><td><strong>2</strong></td><td>$5</td><td>20 trades avec win rate >= 55% et profit factor >= 1,3</td></tr>
+      <tr><td><strong>3</strong></td><td>$10</td><td>20 trades supplementaires au meme standard</td></tr>
+      <tr><td><strong>4</strong></td><td>$50</td><td>20 trades encore — performance constante</td></tr>
+      <tr><td><strong>5</strong></td><td>$100</td><td>Niveau maximum</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Protection : descente automatique</h3>
+  <p>Le scaler <strong>redescend immediatement</strong> d'un niveau si :</p>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-word" style="color:var(--red)">5 pertes</span>
+      <span class="vocab-def">5 trades perdants consecutifs → descente immediate</span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word" style="color:var(--red)">Win rate</span>
+      <span class="vocab-def">Le taux de reussite tombe sous 40% → descente immediate</span>
+    </div>
+  </div>
+
+  <h3>Interaction avec le sizing dynamique</h3>
+  <p>Le scaler et le risque 1-2% travaillent ensemble :</p>
+  <div class="vocab">
+    <div class="vocab-item">
+      <span class="vocab-word">Risque 1%</span>
+      <span class="vocab-def">Calcule la taille ideale basee sur ton capital</span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Scaler</span>
+      <span class="vocab-def">Impose un plafond base sur tes performances</span>
+    </div>
+    <div class="vocab-item">
+      <span class="vocab-word">Resultat</span>
+      <span class="vocab-def"><strong>Le bot prend la plus petite des deux valeurs</strong> = double protection</span>
+    </div>
+  </div>
+
+  <div class="tip green">
+    <strong>Exemple :</strong> Le risque 1% dit "mise $50", mais le scaler est au niveau 2 ($5 max). Le bot mise <strong>$5</strong>. Quand le scaler monte au niveau 4, le bot pourra miser jusqu'a $50.
+  </div>
+</div>
+
+<!-- ==================== RECAPITULATIF ==================== -->
+<div class="step" id="recap-risk">
+  <div class="step-badge">Resume</div>
+  <h2>Tout fonctionne ensemble</h2>
+
+  <p>A chaque cycle (toutes les 30 secondes), le bot fait ces verifications dans l'ordre :</p>
+
+  <ol class="actions">
+    <li><div class="num" style="background:var(--red)">1</div><div><strong>Stop-Loss</strong> — le prix a-t-il franchi le seuil de perte ? Si oui → vente immediate.</div></li>
+    <li><div class="num" style="background:var(--purple)">2</div><div><strong>Trailing TP</strong> — si active, le prix a-t-il recule depuis le sommet ? Si oui → vente.</div></li>
+    <li><div class="num" style="background:var(--green)">3</div><div><strong>Take-Profit fixe</strong> — si trailing desactive, le gain a-t-il atteint le seuil ? Si oui → vente.</div></li>
+    <li><div class="num" style="background:var(--blue)">4</div><div><strong>Signal de strategie</strong> — la strategie dit-elle de changer de direction ? Si oui → fermer et ouvrir.</div></li>
+    <li><div class="num" style="background:var(--cyan)">5</div><div><strong>Nouveau trade</strong> — pas de position ouverte + signal d'achat/vente → calcul du sizing dynamique → ouverture.</div></li>
+  </ol>
+
+  <div class="tip blue" style="font-size:15px;">
+    <strong>Configuration recommandee pour debuter :</strong><br>
+    Risque : <code>1%</code> · Stop-Loss : <code>40%</code> · Take-Profit : <code>60%</code> · Trailing : <code>desactive</code> · Scaler : niveau 1 ($1)
+  </div>
+</div>
+
 <div class="footer">
   <a href="/">Dashboard</a> · <a href="/static/docs.html" target="_blank">Documentation technique</a>
 </div>
