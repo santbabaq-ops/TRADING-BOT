@@ -57,7 +57,33 @@ body {
 .nav-links a:hover { background: var(--bg); }
 .nav-links a.active { background: var(--blue); color: white; }
 
-.container { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+.container { max-width: 1060px; margin: 0 auto; padding: 40px 24px 80px; display: flex; gap: 32px; }
+
+/* Sidebar */
+.sidebar {
+  position: sticky; top: 70px; align-self: flex-start;
+  width: 220px; min-width: 220px; max-height: calc(100vh - 90px);
+  overflow-y: auto; padding: 16px 0;
+}
+.sidebar-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--text-muted); padding: 0 12px 10px;
+}
+.sidebar-section { margin-bottom: 16px; }
+.sidebar-section-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--text-muted); padding: 12px 12px 6px;
+  border-top: 1px solid var(--border);
+}
+.sidebar a {
+  display: block; padding: 5px 12px; font-size: 12.5px; line-height: 1.4;
+  text-decoration: none; color: var(--text-light); border-radius: 6px;
+  border-left: 3px solid transparent; transition: all 0.15s;
+}
+.sidebar a:hover { background: var(--bg); color: var(--text); }
+.sidebar a.active { background: #ebf8ff; border-left-color: var(--blue); color: var(--blue); font-weight: 600; }
+
+.content { flex: 1; min-width: 0; }
 
 .hero { text-align: center; padding: 40px 0 48px; }
 .hero h1 { font-size: 34px; font-weight: 700; letter-spacing: -1px; margin-bottom: 10px; }
@@ -157,6 +183,10 @@ code {
 }
 .footer a { color: var(--blue); text-decoration: none; }
 
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .container { max-width: 760px; padding: 20px 16px 60px; }
+}
 @media (max-width: 600px) {
   .container { padding: 20px 16px 60px; }
   .hero h1 { font-size: 24px; }
@@ -181,13 +211,48 @@ code {
 
 <div class="container">
 
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-title">Sommaire</div>
+  <div class="sidebar-section">
+    <a href="#etape1">1. C'est quoi ce truc ?</a>
+    <a href="#etape2">2. Les mots a connaitre</a>
+    <a href="#etape3">3. Lancer la plateforme</a>
+    <a href="#etape4">4. Comprendre l'ecran</a>
+    <a href="#etape5">5. Premier robot</a>
+    <a href="#etape6">6. Activer les 3 robots</a>
+    <a href="#etape7">7. Les reglages</a>
+    <a href="#etape8">8. Journal des transactions</a>
+    <a href="#etape9">9. Argent reel</a>
+    <a href="#etape10">10. Fichier .env</a>
+    <a href="#etape11">11. Token ID</a>
+    <a href="#etape12">12. Mode Live</a>
+    <a href="#etape13">13. Progression</a>
+    <a href="#etape14">14. Surveillance</a>
+    <a href="#etape15">15. Regles d'or</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-title">Gestion du risque</div>
+    <a href="#risk-percent">Regle du 1-2%</a>
+    <a href="#stop-loss">Stop-Loss</a>
+    <a href="#take-profit">Take-Profit</a>
+    <a href="#trailing-tp">Trailing TP</a>
+    <a href="#dynamic-sizing">Sizing dynamique</a>
+    <a href="#incubation">Incubation (Scaler)</a>
+    <a href="#recap-risk">Resume</a>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="content">
+
 <div class="hero">
   <h1>Comment utiliser ton bot de trading</h1>
   <p>Tout est explique simplement. Lis de haut en bas, etape par etape.</p>
 </div>
 
 <!-- ==================== ETAPE 1 ==================== -->
-<div class="step">
+<div class="step" id="etape1">
   <div class="step-badge">Etape 1</div>
   <h2>C'est quoi ce truc ?</h2>
 
@@ -216,7 +281,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 2 ==================== -->
-<div class="step">
+<div class="step" id="etape2">
   <div class="step-badge cyan">Etape 2</div>
   <h2>Les mots a connaitre</h2>
 
@@ -263,7 +328,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 3 ==================== -->
-<div class="step">
+<div class="step" id="etape3">
   <div class="step-badge green">Etape 3</div>
   <h2>Lancer la plateforme</h2>
 
@@ -282,7 +347,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 4 ==================== -->
-<div class="step">
+<div class="step" id="etape4">
   <div class="step-badge purple">Etape 4</div>
   <h2>Comprendre l'ecran</h2>
 
@@ -306,7 +371,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 5 ==================== -->
-<div class="step">
+<div class="step" id="etape5">
   <div class="step-badge green">Etape 5</div>
   <h2>Demarrer ton premier robot</h2>
 
@@ -325,7 +390,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 6 ==================== -->
-<div class="step">
+<div class="step" id="etape6">
   <div class="step-badge">Etape 6</div>
   <h2>Activer les 3 robots</h2>
 
@@ -339,7 +404,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 7 ==================== -->
-<div class="step">
+<div class="step" id="etape7">
   <div class="step-badge cyan">Etape 7</div>
   <h2>Les reglages</h2>
 
@@ -366,7 +431,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 8 ==================== -->
-<div class="step">
+<div class="step" id="etape8">
   <div class="step-badge purple">Etape 8</div>
   <h2>Lire le journal des transactions</h2>
 
@@ -404,7 +469,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 9 ==================== -->
-<div class="step">
+<div class="step" id="etape9">
   <div class="step-badge amber">Etape 9</div>
   <h2>Passer a l'argent reel</h2>
 
@@ -445,7 +510,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 10 ==================== -->
-<div class="step">
+<div class="step" id="etape10">
   <div class="step-badge amber">Etape 10</div>
   <h2>Configurer le fichier .env pour le Live</h2>
 
@@ -475,7 +540,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 11 ==================== -->
-<div class="step">
+<div class="step" id="etape11">
   <div class="step-badge cyan">Etape 11</div>
   <h2>Trouver un Token ID sur Polymarket</h2>
 
@@ -502,7 +567,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 12 ==================== -->
-<div class="step">
+<div class="step" id="etape12">
   <div class="step-badge green">Etape 12</div>
   <h2>Lancer en mode Live</h2>
 
@@ -539,7 +604,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 13 ==================== -->
-<div class="step">
+<div class="step" id="etape13">
   <div class="step-badge purple">Etape 13</div>
   <h2>Progression recommandee</h2>
 
@@ -561,7 +626,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 14 ==================== -->
-<div class="step">
+<div class="step" id="etape14">
   <div class="step-badge">Etape 14</div>
   <h2>Surveillance quotidienne</h2>
 
@@ -583,7 +648,7 @@ code {
 </div>
 
 <!-- ==================== ETAPE 15 ==================== -->
-<div class="step">
+<div class="step" id="etape15">
   <div class="step-badge red">Etape 15</div>
   <h2>Les 10 regles d'or</h2>
 
@@ -944,6 +1009,29 @@ code {
   <a href="/">Dashboard</a> · <a href="/static/docs.html" target="_blank">Documentation technique</a>
 </div>
 
-</div>
+</div><!-- /content -->
+</div><!-- /container -->
+
+<script>
+// Highlight active sidebar link on scroll
+const sidebarLinks = document.querySelectorAll('.sidebar a');
+const sections = [];
+sidebarLinks.forEach(link => {
+  const id = link.getAttribute('href').slice(1);
+  const el = document.getElementById(id);
+  if (el) sections.push({ id, el, link });
+});
+
+function updateSidebar() {
+  let current = sections[0];
+  for (const s of sections) {
+    if (s.el.getBoundingClientRect().top <= 120) current = s;
+  }
+  sidebarLinks.forEach(l => l.classList.remove('active'));
+  if (current) current.link.classList.add('active');
+}
+window.addEventListener('scroll', updateSidebar, { passive: true });
+updateSidebar();
+</script>
 </body>
 </html>
