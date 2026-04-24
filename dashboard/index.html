@@ -1,86 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Polymarket RBI Bot — Tableau de bord</title>
+<title>Polymarket RBI 交易机器人 — 仪表板</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
 :root {
-  --bg-0: #eef1f5;
-  --bg-1: #f5f7fa;
-  --bg-2: #ffffff;
-  --bg-3: #e8ecf1;
-  --bg-4: #dce1e8;
-  --border: #d0d7e0;
-  --border-bright: #b8c2cf;
-  --text-0: #1a2332;
-  --text-1: #4a5568;
-  --text-2: #8694a7;
-  --green: #0d9f4f;
-  --green-dim: #0d9f4f15;
-  --green-mid: #0d9f4f35;
-  --red: #d32f2f;
-  --red-dim: #d32f2f15;
-  --red-mid: #d32f2f35;
-  --blue: #2563eb;
-  --blue-dim: #2563eb15;
-  --amber: #d97706;
-  --amber-dim: #d9770615;
-  --cyan: #0891b2;
-  --purple: #7c3aed;
+  --bg-0: #eef1f5; --bg-1: #f5f7fa; --bg-2: #ffffff; --bg-3: #e8ecf1; --bg-4: #dce1e8;
+  --border: #d0d7e0; --border-bright: #b8c2cf; --text-0: #1a2332; --text-1: #4a5568; --text-2: #8694a7;
+  --green: #0d9f4f; --green-dim: #0d9f4f15; --green-mid: #0d9f4f35;
+  --red: #d32f2f; --red-dim: #d32f2f15; --red-mid: #d32f2f35;
+  --blue: #2563eb; --blue-dim: #2563eb15; --amber: #d97706; --amber-dim: #d9770615;
+  --cyan: #0891b2; --purple: #7c3aed;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --font-sans: 'Instrument Sans', -apple-system, sans-serif;
-  --radius: 6px;
-  --glow-green: 0 0 12px #0d9f4f20;
-  --glow-red: 0 0 12px #d32f2f20;
+  --radius: 6px; --glow-green: 0 0 12px #0d9f4f20; --glow-red: 0 0 12px #d32f2f20;
 }
-
 html { font-size: 14px; }
-body {
-  background: var(--bg-0);
-  color: var(--text-0);
-  font-family: var(--font-mono);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px);
-  pointer-events: none;
-  z-index: 9999;
-}
-
+body { background: var(--bg-0); color: var(--text-0); font-family: var(--font-mono); min-height: 100vh; overflow-x: hidden; }
+body::after { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.01) 2px, rgba(0,0,0,0.01) 4px); pointer-events: none; z-index: 9999; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-1); }
 ::-webkit-scrollbar-thumb { background: var(--bg-4); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
-
-.header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px; background: var(--bg-1); border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
-}
+.header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: var(--bg-1); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); }
 .header-left { display: flex; align-items: center; gap: 16px; }
 .logo { display: flex; align-items: center; gap: 10px; }
-.logo-icon {
-  width: 32px; height: 32px; background: linear-gradient(135deg, var(--green), var(--cyan));
-  border-radius: 6px; display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; color: var(--bg-0); box-shadow: var(--glow-green);
-}
+.logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--green), var(--cyan)); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; color: var(--bg-0); box-shadow: var(--glow-green); }
 .logo-text { font-family: var(--font-sans); font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
 .logo-sub { font-size: 10px; color: var(--text-2); text-transform: uppercase; letter-spacing: 2px; font-weight: 500; }
-.status-badge {
-  display: flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: 20px;
-  font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
-}
+.status-badge { display: flex; align-items: center; gap: 8px; padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; }
 .status-badge.live { background: var(--green-dim); color: var(--green); border: 2px solid var(--green-mid); }
 .status-badge.dry { background: var(--amber-dim); color: var(--amber); border: 2px solid rgba(255,196,0,0.3); }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; animation: pulse 2s ease-in-out infinite; }
@@ -97,47 +50,24 @@ body::after {
 .conn-status { font-size: 10px; padding: 4px 10px; border-radius: 10px; }
 .conn-status.ok { background: var(--green-dim); color: var(--green); }
 .conn-status.err { background: var(--red-dim); color: var(--red); }
-
 .main { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; max-width: 1600px; margin: 0 auto; }
-
 .panel { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-.panel-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg-2);
-}
-.panel-title {
-  font-family: var(--font-sans); font-weight: 600; font-size: 12px;
-  text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-1);
-  display: flex; align-items: center; gap: 8px;
-}
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--bg-2); }
+.panel-title { font-family: var(--font-sans); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-1); display: flex; align-items: center; gap: 8px; }
 .panel-title::before { content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--blue); }
 .panel-body { padding: 16px; }
-
 .bots-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.bot-card {
-  background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; position: relative;
-}
+.bot-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; position: relative; }
 .bot-card:hover { border-color: var(--border-bright); }
 .bot-card.running { border-color: var(--green-mid); }
-.bot-card.running::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--green), transparent);
-  animation: scan 3s linear infinite;
-}
+.bot-card.running::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--green), transparent); animation: scan 3s linear infinite; }
 @keyframes scan { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
 .bot-card-header { padding: 10px 16px 6px; display: flex; align-items: flex-start; justify-content: space-between; }
 .bot-name { font-family: var(--font-sans); font-weight: 700; font-size: 15px; color: var(--text-0); }
 .bot-desc { font-size: 10px; color: var(--text-2); margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
-.bot-toggle {
-  position: relative; width: 42px; height: 22px; background: var(--bg-4);
-  border-radius: 11px; cursor: pointer; border: 1px solid var(--border); transition: all 0.3s;
-}
+.bot-toggle { position: relative; width: 42px; height: 22px; background: var(--bg-4); border-radius: 11px; cursor: pointer; border: 1px solid var(--border); transition: all 0.3s; }
 .bot-toggle.active { background: var(--green-dim); border-color: var(--green-mid); }
-.bot-toggle::after {
-  content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px;
-  border-radius: 50%; background: var(--text-2); transition: all 0.3s;
-}
+.bot-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-2); transition: all 0.3s; }
 .bot-toggle.active::after { left: 23px; background: var(--green); box-shadow: 0 0 8px var(--green); }
 .bot-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); margin: 0 16px; border-radius: 4px; overflow: hidden; }
 .bot-stat { background: var(--bg-2); padding: 6px 12px; text-align: center; }
@@ -147,55 +77,25 @@ body::after {
 .bot-stat-value.negative { color: var(--red); }
 .bot-sparkline { padding: 4px 16px 6px; height: 40px; }
 .bot-sparkline canvas { width: 100% !important; height: 100% !important; }
-
-/* Help button on bot cards */
-.bot-help-btn {
-  width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border);
-  background: var(--bg-2); color: var(--text-2); font-size: 12px; font-weight: 700;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; margin-right: 8px; font-family: var(--font-sans);
-}
+.bot-help-btn { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-2); color: var(--text-2); font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-right: 8px; font-family: var(--font-sans); }
 .bot-help-btn:hover { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); }
-
-/* Strategy help modal */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-  z-index: 9999; align-items: center; justify-content: center;
-}
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 9999; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
-.modal {
-  background: var(--bg-2); border-radius: 10px; border: 1px solid var(--border);
-  max-width: 480px; width: 90%; padding: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  animation: modalIn 0.2s ease-out;
-}
+.modal { background: var(--bg-2); border-radius: 10px; border: 1px solid var(--border); max-width: 480px; width: 90%; padding: 0; box-shadow: 0 20px 60px rgba(0,0,0,0.15); animation: modalIn 0.2s ease-out; }
 @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-.modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
-}
-.modal-header h3 { font-family: var(--font-sans); font-size: 17px; font-weight: 700; }
-.modal-close {
-  width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--bg-3);
-  color: var(--text-2); font-size: 16px; cursor: pointer; display: flex; align-items: center;
-  justify-content: center; transition: all 0.2s;
-}
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid var(--border); background: var(--bg-1); }
+.modal-header h3 { font-family: var(--font-sans); font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.modal-close { width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--bg-3); color: var(--text-2); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .modal-close:hover { background: var(--red-dim); color: var(--red); }
 .modal-body { padding: 20px 24px 24px; font-family: var(--font-sans); font-size: 13.5px; line-height: 1.8; color: var(--text-1); }
 .modal-body strong { color: var(--text-0); }
-.modal-body .modal-tag {
-  display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 600;
-  padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
-}
+.modal-body .modal-tag { display: inline-block; font-family: var(--font-mono); font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
 .modal-body ul { margin: 10px 0; padding-left: 20px; }
 .modal-body li { margin-bottom: 8px; padding-left: 4px; }
 .modal-body li::marker { color: var(--blue); }
 .modal-header { background: var(--bg-1); }
 .modal-header h3 { display: flex; align-items: center; gap: 10px; }
-.modal-header .modal-icon {
-  width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center;
-  justify-content: center; font-size: 16px; flex-shrink: 0;
-}
-
+.modal-header .modal-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
 .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .metric-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 16px; position: relative; overflow: hidden; }
 .metric-card::after { content: ''; position: absolute; top: 0; right: 0; width: 60px; height: 60px; border-radius: 0 0 0 60px; opacity: 0.05; }
@@ -210,11 +110,9 @@ body::after {
 .metric-value.purple { color: var(--purple); }
 .metric-value.cyan { color: var(--cyan); }
 .metric-sub { font-size: 11px; color: var(--text-2); margin-top: 4px; }
-
 .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
 .chart-container { position: relative; height: 280px; padding: 8px; }
 .chart-container canvas { width: 100% !important; height: 100% !important; }
-
 .risk-grid { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 16px; align-items: center; }
 .risk-item-label { font-size: 10px; color: var(--text-2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
 .risk-bar-track { height: 8px; background: var(--bg-4); border-radius: 4px; overflow: hidden; position: relative; }
@@ -224,28 +122,14 @@ body::after {
 .risk-bar-fill.danger { background: var(--red); box-shadow: 0 0 10px var(--red-dim); }
 .risk-value { font-size: 13px; font-weight: 600; margin-top: 6px; color: var(--text-1); }
 .positions-indicator { display: flex; gap: 6px; margin-top: 8px; }
-.pos-dot {
-  width: 24px; height: 24px; border-radius: 4px; background: var(--bg-4);
-  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-  font-size: 10px; color: var(--text-2);
-}
+.pos-dot { width: 24px; height: 24px; border-radius: 4px; background: var(--bg-4); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-2); }
 .pos-dot.filled { background: var(--green-dim); border-color: var(--green-mid); color: var(--green); }
-.kill-btn {
-  background: var(--red-dim); border: 1px solid var(--red-mid); color: var(--red);
-  padding: 12px 24px; border-radius: var(--radius); font-family: var(--font-mono);
-  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;
-  cursor: pointer; transition: all 0.2s; white-space: nowrap;
-}
+.kill-btn { background: var(--red-dim); border: 1px solid var(--red-mid); color: var(--red); padding: 12px 24px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .kill-btn:hover { background: var(--red); color: var(--bg-0); box-shadow: var(--glow-red); }
-
 .trade-table-wrap { overflow-x: auto; max-height: 380px; overflow-y: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead { position: sticky; top: 0; z-index: 2; }
-th {
-  background: var(--bg-2); padding: 10px 14px; text-align: left; font-size: 10px;
-  font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 1px;
-  border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap;
-}
+th { background: var(--bg-2); padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap; }
 th:hover { color: var(--text-1); }
 th .sort-arrow { margin-left: 4px; font-size: 9px; }
 td { padding: 9px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; color: var(--text-1); }
@@ -258,41 +142,20 @@ tr:hover td { background: var(--bg-2); }
 .status-tag.filled { background: var(--green-dim); color: var(--green); }
 .status-tag.pending { background: var(--amber-dim); color: var(--amber); }
 .status-tag.cancelled { background: var(--bg-4); color: var(--text-2); }
-
-.settings-toggle {
-  background: none; border: 1px solid var(--border); color: var(--text-1);
-  padding: 6px 14px; border-radius: var(--radius); font-family: var(--font-mono);
-  font-size: 11px; cursor: pointer; transition: all 0.2s;
-}
+.settings-toggle { background: none; border: 1px solid var(--border); color: var(--text-1); padding: 6px 14px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 11px; cursor: pointer; transition: all 0.2s; }
 .settings-toggle:hover { border-color: var(--border-bright); color: var(--text-0); }
 .settings-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
 .settings-body.open { max-height: 420px; overflow-y: auto; }
 .settings-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 16px; }
-.setting-group label {
-  display: block; font-size: 10px; color: var(--text-2); text-transform: uppercase;
-  letter-spacing: 1px; margin-bottom: 8px;
-}
-.setting-input {
-  width: 100%; background: var(--bg-2); border: 1px solid var(--border); color: var(--text-0);
-  padding: 8px 12px; border-radius: 4px; font-family: var(--font-mono); font-size: 13px;
-  outline: none; transition: border-color 0.2s;
-}
+.setting-group label { display: block; font-size: 10px; color: var(--text-2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.setting-input { width: 100%; background: var(--bg-2); border: 1px solid var(--border); color: var(--text-0); padding: 8px 12px; border-radius: 4px; font-family: var(--font-mono); font-size: 13px; outline: none; transition: border-color 0.2s; }
 .setting-input:focus { border-color: var(--blue); }
-.setting-slider {
-  -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px;
-  background: var(--bg-4); outline: none; margin-top: 4px;
-}
-.setting-slider::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
-  background: var(--blue); cursor: pointer; box-shadow: 0 0 8px rgba(68,138,255,0.4);
-}
+.setting-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: var(--bg-4); outline: none; margin-top: 4px; }
+.setting-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--blue); cursor: pointer; box-shadow: 0 0 8px rgba(68,138,255,0.4); }
 .dry-run-toggle { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
 .dry-run-toggle .bot-toggle { flex-shrink: 0; }
 .dry-run-label { font-size: 12px; color: var(--text-1); }
-
 .bottom-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; }
-
-/* Log panel */
 .log-entries { max-height: 340px; overflow-y: auto; padding: 8px 12px; font-size: 11px; font-family: var(--font-mono); }
 .log-entry { padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-start; }
 .log-entry:last-child { border-bottom: none; }
@@ -308,23 +171,8 @@ tr:hover td { background: var(--bg-2); }
 .log-filter-btn { font-size: 9px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-2); color: var(--text-2); cursor: pointer; font-family: var(--font-mono); }
 .log-filter-btn.active { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
 .log-filter-btn:hover { border-color: var(--blue); }
-
-@media (max-width: 1200px) {
-  .bots-grid { grid-template-columns: 1fr; }
-  .charts-row { grid-template-columns: 1fr; }
-  .metrics-row { grid-template-columns: repeat(2, 1fr); }
-  .risk-grid { grid-template-columns: 1fr 1fr; }
-  .settings-grid { grid-template-columns: repeat(2, 1fr); }
-  .bottom-row { grid-template-columns: 1fr; }
-}
-@media (max-width: 768px) {
-  .header { flex-direction: column; gap: 12px; }
-  .metrics-row { grid-template-columns: 1fr; }
-  .risk-grid { grid-template-columns: 1fr; }
-  .settings-grid { grid-template-columns: 1fr; }
-  .main { padding: 12px; }
-}
-
+@media (max-width: 1200px) { .bots-grid { grid-template-columns: 1fr; } .charts-row { grid-template-columns: 1fr; } .metrics-row { grid-template-columns: repeat(2, 1fr); } .risk-grid { grid-template-columns: 1fr 1fr; } .settings-grid { grid-template-columns: repeat(2, 1fr); } .bottom-row { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .header { flex-direction: column; gap: 12px; } .metrics-row { grid-template-columns: 1fr; } .risk-grid { grid-template-columns: 1fr; } .settings-grid { grid-template-columns: 1fr; } .main { padding: 12px; } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 .animate-in { animation: fadeInUp 0.4s ease forwards; opacity: 0; }
 .animate-in:nth-child(1) { animation-delay: 0.05s; }
@@ -344,24 +192,24 @@ tr:hover td { background: var(--bg-2); }
     <div class="logo">
       <div class="logo-icon">R</div>
       <div>
-        <div class="logo-text">Polymarket RBI Bot</div>
-        <div class="logo-sub">Recherche &middot; Backtest &middot; Incubation</div>
+        <div class="logo-text">Polymarket RBI 交易机器人</div>
+        <div class="logo-sub">研究 · 回测 · 孵化</div>
       </div>
     </div>
     <div class="status-badge dry" id="globalStatus">
       <div class="status-dot"></div>
-      <span id="globalStatusText" title="Mode simulation — aucun ordre reel n'est envoye">Simulation</span>
+      <span id="globalStatusText" title="模拟模式 — 不会发送任何真实订单">模拟</span>
     </div>
   </div>
   <div class="header-right">
     <div class="tab-bar">
-      <button class="tab-btn active" id="tabDashboard" onclick="switchTab('dashboard')">Dashboard</button>
-      <button class="tab-btn" id="tabConfig" onclick="switchTab('config')">Configuration</button>
-      <button class="tab-btn" id="tabDocs" onclick="switchTab('docs')">Documentation</button>
-      <button class="tab-btn" id="tabAudit" onclick="switchTab('audit')">Audit</button>
+      <button class="tab-btn active" id="tabDashboard" onclick="switchTab('dashboard')">仪表板</button>
+      <button class="tab-btn" id="tabConfig" onclick="switchTab('config')">配置</button>
+      <button class="tab-btn" id="tabDocs" onclick="switchTab('docs')">文档</button>
+      <button class="tab-btn" id="tabAudit" onclick="switchTab('audit')">审计</button>
     </div>
     <a href="https://polymarket.com" target="_blank" style="font-size:11px;color:var(--purple);text-decoration:none;padding:4px 12px;border:1px solid var(--border);border-radius:10px;font-family:var(--font-mono);">Polymarket</a>
-    <div class="conn-status ok" id="connStatus">API Connected</div>
+    <div class="conn-status ok" id="connStatus">API 已连接</div>
     <div class="header-time"><span id="clock">--:--:--</span></div>
   </div>
 </header>
@@ -369,27 +217,27 @@ tr:hover td { background: var(--bg-2); }
 <main class="main">
 
 <div id="viewDashboard">
-  <!-- BOT CARDS — rendered dynamically -->
+  <!-- BOT CARDS -->
   <div class="bots-grid animate-in" id="botsGrid"></div>
 
-  <!-- KEY METRICS — rendered dynamically -->
+  <!-- KEY METRICS -->
   <div class="metrics-row animate-in" id="metricsRow"></div>
 
   <!-- CHARTS -->
   <div class="charts-row animate-in">
     <div class="panel">
-      <div class="panel-header"><div class="panel-title" title="Evolution du capital pour chaque strategie">Courbe de capital</div><button class="bot-help-btn" onclick="openSectionHelp('equity_curve')">?</button></div>
+      <div class="panel-header"><div class="panel-title" title="每种策略的资金变化曲线">资金曲线</div><button class="bot-help-btn" onclick="openSectionHelp('equity_curve')">?</button></div>
       <div class="chart-container"><canvas id="equityChart"></canvas></div>
     </div>
     <div class="panel">
-      <div class="panel-header"><div class="panel-title" title="Pourcentage de trades gagnants par strategie">Taux de reussite</div><button class="bot-help-btn" onclick="openSectionHelp('win_rate_chart')">?</button></div>
+      <div class="panel-header"><div class="panel-title" title="每种策略的盈利交易占比">成功率</div><button class="bot-help-btn" onclick="openSectionHelp('win_rate_chart')">?</button></div>
       <div class="chart-container"><canvas id="winRateChart"></canvas></div>
     </div>
   </div>
 
   <!-- RISK MANAGER -->
   <div class="panel animate-in">
-    <div class="panel-header"><div class="panel-title" title="Controles de risque — limites de perte et de positions">Gestion des risques</div><button class="bot-help-btn" onclick="openSectionHelp('risk_section')">?</button></div>
+    <div class="panel-header"><div class="panel-title" title="风险控制 — 亏损和仓位限额">风险管理</div><button class="bot-help-btn" onclick="openSectionHelp('risk_section')">?</button></div>
     <div class="panel-body">
       <div class="risk-grid" id="riskGrid"></div>
       <div class="risk-extra" id="riskExtra" style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;"></div>
@@ -400,20 +248,20 @@ tr:hover td { background: var(--bg-2); }
   <div class="bottom-row animate-in">
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Journal des transactions</div><button class="bot-help-btn" onclick="openSectionHelp('trade_log')">?</button>
-        <span style="font-size: 11px; color: var(--text-2);" id="tradeCount">0 transactions</span>
+        <div class="panel-title">交易日志</div><button class="bot-help-btn" onclick="openSectionHelp('trade_log')">?</button>
+        <span style="font-size: 11px; color: var(--text-2);" id="tradeCount">0 笔交易</span>
       </div>
       <div class="trade-table-wrap">
         <table>
           <thead>
             <tr>
-              <th onclick="sortTrades('time')">Heure <span class="sort-arrow">&#9662;</span></th>
-              <th onclick="sortTrades('strategy')" title="Strategie utilisee">Strategie</th>
-              <th onclick="sortTrades('side')" title="Achat (BUY) ou Vente (SELL)">Cote</th>
-              <th onclick="sortTrades('price')" title="Prix d'execution">Prix</th>
-              <th onclick="sortTrades('size')" title="Montant en dollars">Taille</th>
-              <th onclick="sortTrades('pnl')" title="Gain ou perte">PnL</th>
-              <th onclick="sortTrades('reason')" title="Declencheur : signal, stop-loss, take-profit, trailing">Raison</th>
+              <th onclick="sortTrades('time')">时间 <span class="sort-arrow">&#9662;</span></th>
+              <th onclick="sortTrades('strategy')">策略</th>
+              <th onclick="sortTrades('side')">方向</th>
+              <th onclick="sortTrades('price')">价格</th>
+              <th onclick="sortTrades('size')">仓位</th>
+              <th onclick="sortTrades('pnl')">盈亏</th>
+              <th onclick="sortTrades('reason')">原因</th>
             </tr>
           </thead>
           <tbody id="tradeBody"></tbody>
@@ -423,175 +271,151 @@ tr:hover td { background: var(--bg-2); }
 
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Parametres</div><button class="bot-help-btn" onclick="openSectionHelp('settings_section')">?</button>
-        <button class="settings-toggle" onclick="toggleSettings()">Ouvrir</button>
+        <div class="panel-title">参数设置</div><button class="bot-help-btn" onclick="openSectionHelp('settings_section')">?</button>
+        <button class="settings-toggle" onclick="toggleSettings()">展开</button>
       </div>
       <div class="settings-body open" id="settingsBody">
         <div class="settings-grid" style="grid-template-columns: 1fr;">
           <div class="setting-group">
-            <label title="Simulation = aucun vrai ordre. Live = ordres reels sur Polymarket">Mode</label>
+            <label>模式</label>
             <div class="dry-run-toggle">
-              <div class="bot-toggle active" id="dryRunToggle" onclick="toggleDryRun()" title="Activer/desactiver le mode simulation"></div>
-              <span class="dry-run-label" id="dryRunLabel">Simulation</span>
+              <div class="bot-toggle active" id="dryRunToggle" onclick="toggleDryRun()"></div>
+              <span class="dry-run-label" id="dryRunLabel">模拟</span>
             </div>
           </div>
           <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
-            <label title="Montant en dollars investi par transaction">Taille de position : <span id="sizeVal">$1.00</span></label>
-            <input type="range" class="setting-slider" id="settingSize" min="1" max="100" value="1"
-                   oninput="onSettingChange()" title="Glisser pour ajuster la taille de chaque position">
+            <label>仓位大小：<span id="sizeVal">$1.00</span></label>
+            <input type="range" class="setting-slider" id="settingSize" min="1" max="100" value="1" oninput="onSettingChange()">
           </div>
           <div class="setting-group">
-            <label title="Pourcentage du capital risque par transaction. 1 = 1%. Ne jamais depasser 2%.">Risque % par transaction</label>
-            <input type="number" class="setting-input" id="settingRisk" value="1" min="0.5" max="5" step="0.5"
-                   onchange="onSettingChange()" title="Ex: 1 = risquer max 1% du capital par transaction">
+            <label>每笔交易风险 %</label>
+            <input type="number" class="setting-input" id="settingRisk" value="1" min="0.5" max="5" step="0.5" onchange="onSettingChange()">
           </div>
           <div class="setting-group">
-            <label title="Pourcentage de perte maximum avant fermeture automatique">Stop Loss %</label>
-            <input type="number" class="setting-input" id="settingSL" value="5" min="1" max="50" step="0.5"
-                   onchange="onSettingChange()" title="Ex: 5 = fermeture si la perte depasse 5%">
+            <label>止损 %</label>
+            <input type="number" class="setting-input" id="settingSL" value="5" min="1" max="50" step="0.5" onchange="onSettingChange()">
           </div>
           <div class="setting-group">
-            <label title="Pourcentage de gain declenchant la prise de profit automatique">Take Profit %</label>
-            <input type="number" class="setting-input" id="settingTP" value="10" min="1" max="100" step="0.5"
-                   onchange="onSettingChange()" title="Ex: 10 = fermeture si le gain depasse 10%">
+            <label>止盈 %</label>
+            <input type="number" class="setting-input" id="settingTP" value="10" min="1" max="100" step="0.5" onchange="onSettingChange()">
           </div>
           <div class="setting-group" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
-            <label title="Active le take-profit dynamique qui suit le prix. Desactive le TP fixe quand actif.">Trailing Take-Profit</label>
+            <label>移动止盈</label>
             <div class="dry-run-toggle">
-              <div class="bot-toggle" id="trailingToggle" onclick="toggleTrailing()" title="Activer/desactiver le trailing TP"></div>
-              <span class="dry-run-label" id="trailingLabel">Desactive</span>
+              <div class="bot-toggle" id="trailingToggle" onclick="toggleTrailing()"></div>
+              <span class="dry-run-label" id="trailingLabel">关闭</span>
             </div>
           </div>
           <div class="setting-group trailing-settings" id="trailingSettings" style="display:none;">
-            <label title="Le trailing demarre quand le gain atteint ce pourcentage">Activation trailing %</label>
-            <input type="number" class="setting-input" id="settingTrailAct" value="30" min="5" max="80" step="5"
-                   onchange="onSettingChange()" title="Ex: 30 = trailing actif apres +30% de gain">
+            <label>激活 %</label>
+            <input type="number" class="setting-input" id="settingTrailAct" value="30" min="5" max="80" step="5" onchange="onSettingChange()">
           </div>
           <div class="setting-group trailing-settings" id="trailingSettings2" style="display:none;">
-            <label title="Vend si le prix recule de ce pourcentage depuis le sommet">Distance trailing %</label>
-            <input type="number" class="setting-input" id="settingTrailDist" value="15" min="5" max="50" step="5"
-                   onchange="onSettingChange()" title="Ex: 15 = vente si -15% du plus haut">
+            <label>距离 %</label>
+            <input type="number" class="setting-input" id="settingTrailDist" value="15" min="5" max="50" step="5" onchange="onSettingChange()">
           </div>
         </div>
       </div>
     </div>
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Logs</div><button class="bot-help-btn" onclick="openSectionHelp('logs_section')">?</button>
+        <div class="panel-title">日志</div><button class="bot-help-btn" onclick="openSectionHelp('logs_section')">?</button>
         <div class="log-filters">
-          <button class="log-filter-btn active" onclick="filterLogs('')" id="logFilterAll">Tous</button>
-          <button class="log-filter-btn" onclick="filterLogs('TRADE')" id="logFilterTrade">Trades</button>
-          <button class="log-filter-btn" onclick="filterLogs('ERROR')" id="logFilterError">Erreurs</button>
+          <button class="log-filter-btn active" onclick="filterLogs('')" id="logFilterAll">全部</button>
+          <button class="log-filter-btn" onclick="filterLogs('TRADE')" id="logFilterTrade">交易</button>
+          <button class="log-filter-btn" onclick="filterLogs('ERROR')" id="logFilterError">错误</button>
         </div>
       </div>
       <div class="log-entries" id="logEntries">
-        <div style="color:var(--text-2);padding:20px;text-align:center;">En attente de logs...</div>
+        <div style="color:var(--text-2);padding:20px;text-align:center;">等待日志...</div>
       </div>
     </div>
-
   </div>
-
 </div><!-- /viewDashboard -->
 
 <div id="viewConfig" style="display:none;">
-    <!-- CONFIGURATION -->
-    <div class="panel" id="configPanel">
-      <div class="panel-header">
-        <div class="panel-title">Configuration</div>
-      </div>
-      <div id="configBody" style="padding:8px 0;">
-        <div id="configForm" style="display:grid;gap:16px;">
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:4px;">Polymarket</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
-            <div class="setting-group"><label>Cle privee</label><input type="password" class="setting-input cfg" id="cfg_POLYMARKET_PRIVATE_KEY"></div>
-            <div class="setting-group"><label>Adresse wallet</label><input type="text" class="setting-input cfg" id="cfg_POLYMARKET_FUNDER_ADDRESS"></div>
-            <div class="setting-group"><label>Token ID (marche)</label><input type="text" class="setting-input cfg" id="cfg_POLYMARKET_TOKEN_ID" placeholder="vide = demo"></div>
-          </div>
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Risques</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr;">
-            <div class="setting-group"><label>Position max ($)</label><input type="number" class="setting-input cfg" id="cfg_MAX_POSITION_SIZE"></div>
-            <div class="setting-group"><label>Perte jour max ($)</label><input type="number" class="setting-input cfg" id="cfg_MAX_DAILY_LOSS"></div>
-            <div class="setting-group"><label>Positions ouvertes max</label><input type="number" class="setting-input cfg" id="cfg_MAX_OPEN_POSITIONS"></div>
-          </div>
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Telegram</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
-            <div class="setting-group"><label>Bot Token</label><input type="text" class="setting-input cfg" id="cfg_TELEGRAM_BOT_TOKEN"></div>
-            <div class="setting-group"><label>Chat ID</label><input type="text" class="setting-input cfg" id="cfg_TELEGRAM_CHAT_ID"></div>
-          </div>
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Email (SMTP)</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
-            <div class="setting-group"><label>Serveur SMTP</label><input type="text" class="setting-input cfg" id="cfg_SMTP_HOST"></div>
-            <div class="setting-group"><label>Port</label><input type="number" class="setting-input cfg" id="cfg_SMTP_PORT"></div>
-            <div class="setting-group"><label>Email</label><input type="email" class="setting-input cfg" id="cfg_SMTP_USER"></div>
-            <div class="setting-group"><label>Mot de passe SMTP</label><input type="password" class="setting-input cfg" id="cfg_SMTP_PASSWORD"></div>
-            <div class="setting-group"><label>Destinataire alertes</label><input type="email" class="setting-input cfg" id="cfg_ALERT_EMAIL_TO"></div>
-          </div>
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Seuils d'alerte ($)</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
-            <div class="setting-group"><label>Perte/trade</label><input type="number" class="setting-input cfg" id="cfg_ALERT_LOSS_THRESHOLD"></div>
-            <div class="setting-group"><label>Gain/trade</label><input type="number" class="setting-input cfg" id="cfg_ALERT_GAIN_THRESHOLD"></div>
-            <div class="setting-group"><label>Perte/jour</label><input type="number" class="setting-input cfg" id="cfg_ALERT_DAILY_LOSS_THRESHOLD"></div>
-            <div class="setting-group"><label>Gain/jour</label><input type="number" class="setting-input cfg" id="cfg_ALERT_DAILY_GAIN_THRESHOLD"></div>
-          </div>
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Copy-Trading</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr;">
-            <div class="setting-group"><label>Min trades</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_MIN_TRADES"></div>
-            <div class="setting-group"><label>Win rate min</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_MIN_WIN_RATE" step="0.01"></div>
-            <div class="setting-group"><label>Top N wallets</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_TOP_N"></div>
-            <div class="setting-group"><label>Scan interval (s)</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_SCAN_INTERVAL"></div>
-            <div class="setting-group"><label>Rescore interval (s)</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_RESCORE_INTERVAL"></div>
-          </div>
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Authentification</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
-            <div class="setting-group"><label>Identifiant</label><input type="text" class="setting-input cfg" id="cfg_AUTH_USERNAME"></div>
-            <div class="setting-group"><label>Mot de passe</label><input type="password" class="setting-input cfg" id="cfg_AUTH_PASSWORD"></div>
-          </div>
-
-          <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Systeme</div>
-          <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
-            <div class="setting-group"><label>Mode</label><select class="setting-input cfg" id="cfg_DRY_RUN"><option value="true">Simulation</option><option value="false">Live</option></select></div>
-            <div class="setting-group"><label>Log Level</label><select class="setting-input cfg" id="cfg_LOG_LEVEL"><option>INFO</option><option>DEBUG</option><option>WARNING</option><option>ERROR</option></select></div>
-            <div class="setting-group"><label>CORS Origins</label><input type="text" class="setting-input cfg" id="cfg_CORS_ORIGINS"></div>
-          </div>
-
-          <div style="display:flex;gap:10px;margin-top:8px;">
-            <button onclick="saveConfig()" style="padding:8px 24px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;font-weight:600;cursor:pointer;">Enregistrer</button>
-            <span id="configStatus" style="font-size:12px;color:var(--green);align-self:center;"></span>
-          </div>
-          <div style="font-size:11px;color:var(--text-2);margin-top:2px;">Les modifications necessitent un redemarrage du serveur pour prendre effet.</div>
-
+  <div class="panel" id="configPanel">
+    <div class="panel-header"><div class="panel-title">配置</div></div>
+    <div id="configBody" style="padding:8px 0;">
+      <div id="configForm" style="display:grid;gap:16px;">
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:4px;">Polymarket</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="setting-group"><label>私钥</label><input type="password" class="setting-input cfg" id="cfg_POLYMARKET_PRIVATE_KEY"></div>
+          <div class="setting-group"><label>钱包地址</label><input type="text" class="setting-input cfg" id="cfg_POLYMARKET_FUNDER_ADDRESS"></div>
+          <div class="setting-group"><label>Token ID（品种）</label><input type="text" class="setting-input cfg" id="cfg_POLYMARKET_TOKEN_ID" placeholder="留空 = 模拟"></div>
         </div>
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">风险</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="setting-group"><label>最大仓位（$）</label><input type="number" class="setting-input cfg" id="cfg_MAX_POSITION_SIZE"></div>
+          <div class="setting-group"><label>最大日亏损（$）</label><input type="number" class="setting-input cfg" id="cfg_MAX_DAILY_LOSS"></div>
+          <div class="setting-group"><label>最大开仓数</label><input type="number" class="setting-input cfg" id="cfg_MAX_OPEN_POSITIONS"></div>
+        </div>
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">Telegram</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="setting-group"><label>机器人 Token</label><input type="text" class="setting-input cfg" id="cfg_TELEGRAM_BOT_TOKEN"></div>
+          <div class="setting-group"><label>聊天 ID</label><input type="text" class="setting-input cfg" id="cfg_TELEGRAM_CHAT_ID"></div>
+        </div>
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">邮件（SMTP）</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="setting-group"><label>SMTP 服务器</label><input type="text" class="setting-input cfg" id="cfg_SMTP_HOST"></div>
+          <div class="setting-group"><label>端口</label><input type="number" class="setting-input cfg" id="cfg_SMTP_PORT"></div>
+          <div class="setting-group"><label>邮箱</label><input type="email" class="setting-input cfg" id="cfg_SMTP_USER"></div>
+          <div class="setting-group"><label>SMTP 密码</label><input type="password" class="setting-input cfg" id="cfg_SMTP_PASSWORD"></div>
+          <div class="setting-group"><label>警报收件人</label><input type="email" class="setting-input cfg" id="cfg_ALERT_EMAIL_TO"></div>
+        </div>
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">警报阈值（$）</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+          <div class="setting-group"><label>单笔亏损</label><input type="number" class="setting-input cfg" id="cfg_ALERT_LOSS_THRESHOLD"></div>
+          <div class="setting-group"><label>单笔盈利</label><input type="number" class="setting-input cfg" id="cfg_ALERT_GAIN_THRESHOLD"></div>
+          <div class="setting-group"><label>日亏损</label><input type="number" class="setting-input cfg" id="cfg_ALERT_DAILY_LOSS_THRESHOLD"></div>
+          <div class="setting-group"><label>日盈利</label><input type="number" class="setting-input cfg" id="cfg_ALERT_DAILY_GAIN_THRESHOLD"></div>
+        </div>
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">跟单交易</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="setting-group"><label>最少交易数</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_MIN_TRADES"></div>
+          <div class="setting-group"><label>最低胜率</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_MIN_WIN_RATE" step="0.01"></div>
+          <div class="setting-group"><label>排名前 N</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_TOP_N"></div>
+          <div class="setting-group"><label>扫描间隔（秒）</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_SCAN_INTERVAL"></div>
+          <div class="setting-group"><label>重评间隔（秒）</label><input type="number" class="setting-input cfg" id="cfg_COPYTRADE_RESCORE_INTERVAL"></div>
+        </div>
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">认证</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="setting-group"><label>用户名</label><input type="text" class="setting-input cfg" id="cfg_AUTH_USERNAME"></div>
+          <div class="setting-group"><label>密码</label><input type="password" class="setting-input cfg" id="cfg_AUTH_PASSWORD"></div>
+        </div>
+        <div style="font-weight:600;font-size:12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:4px;margin-top:8px;">系统</div>
+        <div class="settings-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="setting-group"><label>模式</label><select class="setting-input cfg" id="cfg_DRY_RUN"><option value="true">模拟</option><option value="false">实盘</option></select></div>
+          <div class="setting-group"><label>日志级别</label><select class="setting-input cfg" id="cfg_LOG_LEVEL"><option>INFO</option><option>DEBUG</option><option>WARNING</option><option>ERROR</option></select></div>
+          <div class="setting-group"><label>CORS 来源</label><input type="text" class="setting-input cfg" id="cfg_CORS_ORIGINS"></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button onclick="saveConfig()" style="padding:8px 24px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;font-weight:600;cursor:pointer;">保存</button>
+          <span id="configStatus" style="font-size:12px;color:var(--green);align-self:center;"></span>
+        </div>
+        <div style="font-size:11px;color:var(--text-2);margin-top:2px;">修改后需要重启服务器才能生效。</div>
       </div>
     </div>
-
+  </div>
 </div><!-- /viewConfig -->
 
 <div id="viewDocs" style="display:none;">
   <div class="panel" style="padding:0;overflow:hidden;">
     <div class="panel-header" style="padding:12px 16px;">
-      <div class="panel-title">Documentation</div>
+      <div class="panel-title">文档</div>
       <div style="display:flex;gap:8px;">
-        <button class="settings-toggle" onclick="loadDocFrame('guide')" id="docBtnGuide">Guide</button>
-        <button class="settings-toggle" onclick="loadDocFrame('docs')" id="docBtnDocs">Docs</button>
+        <button class="settings-toggle" onclick="loadDocFrame('guide')" id="docBtnGuide">教程</button>
+        <button class="settings-toggle" onclick="loadDocFrame('docs')" id="docBtnDocs">文档</button>
         <button class="settings-toggle" onclick="loadDocFrame('api')" id="docBtnApi">API</button>
       </div>
     </div>
-    <iframe id="docFrame" src="/static/guide.html" style="width:100%;height:calc(100vh - 160px);border:none;"></iframe>
+    <iframe id="docFrame" src="/static/guide_zh.html" style="width:100%;height:calc(100vh - 160px);border:none;"></iframe>
   </div>
 </div><!-- /viewDocs -->
 
 <div id="viewAudit" style="display:none;">
   <div class="panel" style="padding:0;overflow:hidden;">
-    <div class="panel-header" style="padding:12px 16px;">
-      <div class="panel-title">Audit</div>
-    </div>
+    <div class="panel-header" style="padding:12px 16px;"><div class="panel-title">审计</div></div>
     <iframe src="/static/audit.html" style="width:100%;height:calc(100vh - 160px);border:none;"></iframe>
   </div>
 </div><!-- /viewAudit -->
@@ -599,11 +423,9 @@ tr:hover td { background: var(--bg-2); }
 </main>
 
 <script>
-// ========== CONFIG ==========
 const API_BASE = window.location.origin;
-const POLL_INTERVAL = 3000; // 3 seconds
+const POLL_INTERVAL = 3000;
 
-// ========== STATE ==========
 let currentTrades = [];
 let sortCol = 'time';
 let sortAsc = false;
@@ -611,25 +433,7 @@ let sparkCharts = {};
 let equityChart = null;
 let winRateChart = null;
 let apiConnected = false;
-let i18n = null; // loaded from i18n.json
 
-// ========== I18N ==========
-async function loadI18n() {
-  try {
-    const res = await fetch('/static/i18n.json');
-    i18n = await res.json();
-  } catch(e) {
-    console.warn('i18n.json not found, using inline defaults');
-    i18n = null;
-  }
-}
-
-function t(section, key, fallback) {
-  if (i18n && i18n[section] && i18n[section][key]) return i18n[section][key];
-  return fallback || key;
-}
-
-// ========== API HELPERS ==========
 async function api(endpoint, method = 'GET', body = null) {
   try {
     const opts = { method, headers: { 'Content-Type': 'application/json' } };
@@ -652,17 +456,15 @@ function setConnected(ok) {
   apiConnected = ok;
   const el = document.getElementById('connStatus');
   el.className = 'conn-status ' + (ok ? 'ok' : 'err');
-  el.textContent = ok ? t('header','api_connected') : t('header','api_offline');
+  el.textContent = ok ? 'API 已连接' : 'API 离线';
 }
 
-// ========== CLOCK ==========
 function updateClock() {
-  document.getElementById('clock').textContent = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// ========== BOT CARDS ==========
 function renderBots(bots) {
   const grid = document.getElementById('botsGrid');
   grid.innerHTML = bots.map(b => `
@@ -673,21 +475,21 @@ function renderBots(bots) {
           <div class="bot-desc">${b.desc}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <button class="bot-help-btn" onclick="openStrategyHelp('${b.key}')" title="Aide sur cette strategie">?</button>
+          <button class="bot-help-btn" onclick="openStrategyHelp('${b.key}')" title="查看策略帮助">?</button>
           <div class="bot-toggle ${b.running ? 'active' : ''}" onclick="toggleBot('${b.key}', ${b.running})"></div>
         </div>
       </div>
       <div class="bot-stats">
-        <div class="bot-stat" title="${t('bots','win_rate_tooltip')}">
-          <div class="bot-stat-label">${t('bots','win_rate')}</div>
+        <div class="bot-stat" title="盈利交易占比">
+          <div class="bot-stat-label">成功率</div>
           <div class="bot-stat-value ${b.win_rate >= 50 ? 'positive' : 'negative'}">${b.win_rate}%</div>
         </div>
-        <div class="bot-stat" title="${t('bots','pnl_tooltip')}">
-          <div class="bot-stat-label">${t('bots','pnl')}</div>
+        <div class="bot-stat" title="总盈亏">
+          <div class="bot-stat-label">盈/亏</div>
           <div class="bot-stat-value ${b.total_pnl >= 0 ? 'positive' : 'negative'}">${b.total_pnl >= 0 ? '+' : ''}$${b.total_pnl.toFixed(2)}</div>
         </div>
-        <div class="bot-stat" title="${t('bots','trades_tooltip')}">
-          <div class="bot-stat-label">${t('bots','trades')}</div>
+        <div class="bot-stat" title="已执行的总交易次数">
+          <div class="bot-stat-label">交易次数</div>
           <div class="bot-stat-value">${b.total_trades}</div>
         </div>
       </div>
@@ -695,265 +497,154 @@ function renderBots(bots) {
     </div>
   `).join('');
 
-  // Render sparklines
   bots.forEach(b => {
     const data = b.pnl_history.length > 0 ? b.pnl_history : [0];
     if (sparkCharts[b.key]) sparkCharts[b.key].destroy();
     sparkCharts[b.key] = new Chart(document.getElementById(`spark-${b.key}`), {
       type: 'line',
-      data: {
-        labels: data.map((_, i) => i),
-        datasets: [{
-          data,
-          borderColor: b.color,
-          backgroundColor: b.color + '15',
-          fill: true, tension: 0.4, borderWidth: 1.5, pointRadius: 0,
-        }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { enabled: false } },
-        scales: { x: { display: false }, y: { display: false } },
-        animation: { duration: 0 },
-      },
+      data: { labels: data.map((_, i) => i), datasets: [{ data, borderColor: b.color, backgroundColor: b.color + '15', fill: true, tension: 0.4, borderWidth: 1.5, pointRadius: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false } }, animation: { duration: 0 } },
     });
   });
 }
 
 async function toggleBot(key, isRunning) {
-  if (isRunning) {
-    await api(`/api/bots/${key}/stop`, 'POST');
-  } else {
-    await api(`/api/bots/${key}/start`, 'POST');
-  }
+  if (isRunning) { await api(`/api/bots/${key}/stop`, 'POST'); }
+  else { await api(`/api/bots/${key}/start`, 'POST'); }
   refreshAll();
 }
 
-// ========== METRICS ==========
 function renderMetrics(m) {
   const el = document.getElementById('metricsRow');
   const pnlColor = m.total_pnl >= 0 ? 'green' : 'red';
   el.innerHTML = `
-    <div class="metric-card green" title="${t('metrics','total_pnl_tooltip')}">
+    <div class="metric-card green">
       <button class="bot-help-btn" onclick="openSectionHelp('total_pnl')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
-      <div class="metric-label">${t('metrics','total_pnl')}</div>
+      <div class="metric-label">总盈亏</div>
       <div class="metric-value ${pnlColor}">${m.total_pnl >= 0 ? '+' : ''}$${m.total_pnl.toFixed(2)}</div>
-      <div class="metric-sub">${t('metrics','total_pnl_sub')}</div>
+      <div class="metric-sub">4 种策略汇总</div>
     </div>
-    <div class="metric-card blue" title="${t('metrics','best_strategy_tooltip')}">
+    <div class="metric-card blue">
       <button class="bot-help-btn" onclick="openSectionHelp('best_strategy')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
-      <div class="metric-label">${t('metrics','best_strategy')}</div>
+      <div class="metric-label">最佳策略</div>
       <div class="metric-value blue">${m.best_strategy}</div>
-      <div class="metric-sub">${m.best_win_rate}% ${t('metrics','best_strategy_sub')}</div>
+      <div class="metric-sub">${m.best_win_rate}% 成功率</div>
     </div>
-    <div class="metric-card purple" title="${t('metrics','total_trades_tooltip')}">
+    <div class="metric-card purple">
       <button class="bot-help-btn" onclick="openSectionHelp('total_trades')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
-      <div class="metric-label">${t('metrics','total_trades')}</div>
+      <div class="metric-label">总交易次数</div>
       <div class="metric-value purple">${m.total_trades}</div>
-      <div class="metric-sub">${t('metrics','total_trades_sub')}</div>
+      <div class="metric-sub">自开始以来</div>
     </div>
-    <div class="metric-card cyan" title="${t('metrics','sharpe_tooltip')}">
+    <div class="metric-card cyan">
       <button class="bot-help-btn" onclick="openSectionHelp('sharpe')" style="position:absolute;top:8px;right:8px;z-index:1">?</button>
-      <div class="metric-label">${t('metrics','sharpe')}</div>
+      <div class="metric-label">夏普比率</div>
       <div class="metric-value cyan">${m.sharpe_ratio.toFixed(2)}</div>
-      <div class="metric-sub">${t('metrics','sharpe_sub')}</div>
+      <div class="metric-sub">每笔交易</div>
     </div>
   `;
 }
 
-// ========== EQUITY CHART ==========
 function updateEquityChart(bots) {
   const colors = { macd: '#00e676', rsi: '#448aff', cvd: '#b388ff' };
-  const datasets = bots.map(b => ({
-    label: b.name,
-    data: b.pnl_history.length > 0 ? b.pnl_history : [0],
-    borderColor: colors[b.key] || b.color,
-    backgroundColor: (colors[b.key] || b.color) + '08',
-    fill: true, tension: 0.3, borderWidth: 1.5, pointRadius: 0,
-  }));
-
+  const datasets = bots.map(b => ({ label: b.name, data: b.pnl_history.length > 0 ? b.pnl_history : [0], borderColor: colors[b.key] || b.color, backgroundColor: (colors[b.key] || b.color) + '08', fill: true, tension: 0.3, borderWidth: 1.5, pointRadius: 0 }));
   const maxLen = Math.max(...datasets.map(d => d.data.length), 1);
   const labels = Array.from({ length: maxLen }, (_, i) => i);
-
-  if (equityChart) {
-    equityChart.data.labels = labels;
-    equityChart.data.datasets = datasets;
-    equityChart.update('none');
-  } else {
+  if (equityChart) { equityChart.data.labels = labels; equityChart.data.datasets = datasets; equityChart.update('none'); }
+  else {
     equityChart = new Chart(document.getElementById('equityChart'), {
       type: 'line',
       data: { labels, datasets },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { position: 'top', labels: { boxWidth: 10, padding: 16, font: { size: 10 } } },
-          tooltip: {
-            backgroundColor: '#121820', borderColor: '#2a3a4e', borderWidth: 1,
-            titleFont: { size: 11 }, bodyFont: { size: 11 }, padding: 10,
-            callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}` }
-          }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { maxTicksLimit: 10, display: false } },
-          y: { grid: { color: '#1e2a3840' }, ticks: { callback: v => '$' + v.toFixed(0) } },
-        },
-        animation: { duration: 0 },
-      },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 16, font: { size: 10 } } }, tooltip: { backgroundColor: '#121820', borderColor: '#2a3a4e', borderWidth: 1, titleFont: { size: 11 }, bodyFont: { size: 11 }, padding: 10, callbacks: { label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toFixed(2)}` } } }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 10, display: false } }, y: { grid: { color: '#1e2a3840' }, ticks: { callback: v => '$' + v.toFixed(0) } } }, animation: { duration: 0 } },
     });
   }
 }
 
-// ========== WIN RATE CHART ==========
 function updateWinRateChart(bots) {
   const labels = bots.map(b => b.name);
   const winRates = bots.map(b => b.win_rate);
   const colors = bots.map(b => b.color);
-
-  if (winRateChart) {
-    winRateChart.data.labels = labels;
-    winRateChart.data.datasets[0].data = winRates;
-    winRateChart.data.datasets[0].backgroundColor = colors.map(c => c + '40');
-    winRateChart.data.datasets[0].borderColor = colors;
-    winRateChart.update('none');
-  } else {
+  if (winRateChart) { winRateChart.data.labels = labels; winRateChart.data.datasets[0].data = winRates; winRateChart.data.datasets[0].backgroundColor = colors.map(c => c + '40'); winRateChart.data.datasets[0].borderColor = colors; winRateChart.update('none'); }
+  else {
     winRateChart = new Chart(document.getElementById('winRateChart'), {
       type: 'bar',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Taux de reussite %',
-          data: winRates,
-          backgroundColor: colors.map(c => c + '40'),
-          borderColor: colors,
-          borderWidth: 1.5, borderRadius: 4, barThickness: 36,
-        }],
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } } },
-        scales: {
-          x: { grid: { display: false } },
-          y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e2a3830' } },
-        },
-        animation: { duration: 0 },
-      },
+      data: { labels, datasets: [{ label: '成功率 %', data: winRates, backgroundColor: colors.map(c => c + '40'), borderColor: colors, borderWidth: 1.5, borderRadius: 4, barThickness: 36 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } } }, scales: { x: { grid: { display: false } }, y: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#1e2a3830' } } }, animation: { duration: 0 } },
     });
   }
 }
 
-// ========== RISK ==========
 function renderRisk(r) {
   const pct = Math.min(r.daily_loss_pct, 100);
   const barClass = pct < 50 ? 'safe' : pct < 80 ? 'warning' : 'danger';
   const botKeys = ['macd', 'rsi', 'cvd', 'copytrade'];
   const botLabels = ['M', 'R', 'C', 'CT'];
-
-  document.getElementById('riskGrid').innerHTML = `
-    <div>
-      <div class="risk-item-label" title="${t('risk','daily_loss_tooltip')}">${t('risk','daily_loss')}</div>
-      <div class="risk-bar-track">
-        <div class="risk-bar-fill ${barClass}" style="width: ${pct}%"></div>
-      </div>
-      <div class="risk-value">$${Math.abs(r.daily_pnl).toFixed(2)} / $${r.max_daily_loss.toFixed(2)}</div>
-    </div>
-    <div>
-      <div class="risk-item-label" title="${t('risk','open_positions_tooltip')}">${t('risk','open_positions')}</div>
-      <div class="positions-indicator">
-        ${botKeys.map((k, i) => `<div class="pos-dot ${r.running_bots.includes(k) ? 'filled' : ''}">${botLabels[i]}</div>`).join('')}
-      </div>
-      <div class="risk-value">${r.running_bots.length} / ${r.max_positions} ${t('risk','slots')}</div>
-    </div>
-    <div>
-      <div class="risk-item-label" title="${t('risk','position_size_tooltip')}">${t('risk','position_size')}</div>
-      <div class="risk-value" style="font-size: 20px; margin-top: 4px;">$${r.position_size.toFixed(2)}</div>
-    </div>
-    <div>
-      <button class="kill-btn" onclick="killAll()" title="${t('risk','kill_all_tooltip')}">&#9632; ${t('risk','kill_all')}</button>
-    </div>
-  `;
-
-  // Extra risk info row
-  const balanceStr = r.balance > 0 ? '$' + r.balance.toFixed(2) : '--';
-  const trailingStr = r.trailing_tp_enabled
-    ? `${t('risk','trailing_on')} (${r.trailing_tp_activation}% / ${r.trailing_tp_distance}%)`
-    : t('risk','trailing_off');
+  const trailingStr = r.trailing_tp_enabled ? `开启 (${r.trailing_tp_activation}% / ${r.trailing_tp_distance}%)` : '关闭';
   const trailingColor = r.trailing_tp_enabled ? 'var(--purple)' : 'var(--text-2)';
 
-  // Scaler info — show best level across bots
   let scalerHtml = '--';
   if (r.scalers && Object.keys(r.scalers).length > 0) {
     const levels = Object.values(r.scalers);
     const best = levels.reduce((a, b) => a.level > b.level ? a : b, levels[0]);
     const pctLevel = (best.level / 5) * 100;
     const levelBarClass = best.level <= 2 ? 'safe' : best.level <= 4 ? 'warning' : 'danger';
-    scalerHtml = `
-      <div class="risk-bar-track" style="margin-bottom:4px;">
-        <div class="risk-bar-fill ${levelBarClass}" style="width: ${pctLevel}%; background: var(--purple);"></div>
-      </div>
-      <span>Niv. ${best.level}/5 — max $${best.current_size}</span>
-      <span style="color:var(--text-2);font-size:11px;"> (${best.trades_at_level} tx)</span>
-    `;
+    scalerHtml = `<div class="risk-bar-track" style="margin-bottom:4px;"><div class="risk-bar-fill ${levelBarClass}" style="width: ${pctLevel}%; background: var(--purple);"></div></div><span>等级 ${best.level}/5 — 最大 $${best.current_size}</span><span style="color:var(--text-2);font-size:11px;"> (${best.trades_at_level} 笔)</span>`;
   }
 
+  document.getElementById('riskGrid').innerHTML = `
+    <div>
+      <div class="risk-item-label">日亏损</div>
+      <div class="risk-bar-track"><div class="risk-bar-fill ${barClass}" style="width: ${pct}%"></div></div>
+      <div class="risk-value">$${Math.abs(r.daily_pnl).toFixed(2)} / $${r.max_daily_loss.toFixed(2)}</div>
+    </div>
+    <div>
+      <div class="risk-item-label">开仓仓位</div>
+      <div class="positions-indicator">${botKeys.map((k, i) => `<div class="pos-dot ${r.running_bots.includes(k) ? 'filled' : ''}">${botLabels[i]}</div>`).join('')}</div>
+      <div class="risk-value">${r.running_bots.length} / ${r.max_positions} 个仓位</div>
+    </div>
+    <div>
+      <div class="risk-item-label">每机器人仓位</div>
+      <div class="risk-value" style="font-size: 20px; margin-top: 4px;">$${r.position_size.toFixed(2)}</div>
+    </div>
+    <div><button class="kill-btn" onclick="killAll()">&#9632; 全部停止</button></div>
+  `;
+
+  const balanceStr = r.balance > 0 ? '$' + r.balance.toFixed(2) : '--';
   document.getElementById('riskExtra').innerHTML = `
     <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
-      <div class="risk-item-label" title="${t('risk','balance_tooltip')}">${t('risk','balance')}</div>
+      <div class="risk-item-label">USDC 余额</div>
       <div class="risk-value" style="font-size:18px;color:var(--green);margin-top:4px;">${balanceStr}</div>
-      <div style="font-size:11px;color:var(--text-2);margin-top:2px;">Risque: ${r.risk_per_trade_pct}% / tx</div>
+      <div style="font-size:11px;color:var(--text-2);margin-top:2px;">风险: ${r.risk_per_trade_pct}% / 笔</div>
     </div>
     <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
-      <div class="risk-item-label" title="${t('risk','scaler_level_tooltip')}">${t('risk','scaler_level')}</div>
+      <div class="risk-item-label">孵化等级</div>
       <div class="risk-value" style="font-size:13px;margin-top:4px;">${scalerHtml}</div>
     </div>
     <div style="background:var(--bg-1);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
-      <div class="risk-item-label" title="${t('risk','trailing_tooltip')}">${t('risk','trailing_label')}</div>
+      <div class="risk-item-label">移动止盈</div>
       <div class="risk-value" style="font-size:13px;margin-top:4px;color:${trailingColor};">${trailingStr}</div>
     </div>
   `;
 }
 
 async function killAll() {
-  if (!confirm(t('risk','kill_all_confirm'))) return;
+  if (!confirm('确定停止所有机器人吗？这将取消所有挂单。')) return;
   await api('/api/bots/kill-all', 'POST');
   refreshAll();
 }
 
-// ========== TRADES ==========
-const REASON_LABELS = {
-  'signal': 'Signal',
-  'signal-reversal': 'Retournement',
-  'stop-loss': 'Stop-Loss',
-  'take-profit': 'Take-Profit',
-  'trailing-tp': 'Trailing TP',
-};
-const REASON_COLORS = {
-  'signal': 'var(--blue)',
-  'signal-reversal': 'var(--amber)',
-  'stop-loss': 'var(--red)',
-  'take-profit': 'var(--green)',
-  'trailing-tp': 'var(--purple)',
-};
+const REASON_LABELS = { 'signal': '信号', 'signal-reversal': '反转', 'stop-loss': '止损', 'take-profit': '止盈', 'trailing-tp': '移动止盈' };
+const REASON_COLORS = { 'signal': 'var(--blue)', 'signal-reversal': 'var(--amber)', 'stop-loss': 'var(--red)', 'take-profit': 'var(--green)', 'trailing-tp': 'var(--purple)' };
 
 function renderTrades(trades) {
-  document.getElementById('tradeCount').textContent = `${trades.length} transactions`;
+  document.getElementById('tradeCount').textContent = `${trades.length} 笔交易`;
   document.getElementById('tradeBody').innerHTML = trades.map(t => {
     const pnl = parseFloat(t.pnl);
     const timeStr = t.time ? t.time.replace('T', ' ').slice(0, 19) : '--';
     const reason = t.reason || 'signal';
     const reasonLabel = REASON_LABELS[reason] || reason;
     const reasonColor = REASON_COLORS[reason] || 'var(--text-2)';
-    return `
-      <tr>
-        <td>${timeStr}</td>
-        <td>${t.strategy}</td>
-        <td class="${t.side === 'BUY' ? 'side-buy' : 'side-sell'}">${t.side}</td>
-        <td>$${parseFloat(t.price).toFixed(4)}</td>
-        <td>$${parseFloat(t.size).toFixed(2)}</td>
-        <td class="${pnl >= 0 ? 'pnl-positive' : 'pnl-negative'}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(4)}</td>
-        <td><span style="color:${reasonColor};font-weight:600;font-size:11px;">${reasonLabel}</span></td>
-      </tr>
-    `;
+    return `<tr><td>${timeStr}</td><td>${t.strategy}</td><td class="${t.side === 'BUY' ? 'side-buy' : 'side-sell'}">${t.side}</td><td>$${parseFloat(t.price).toFixed(4)}</td><td>$${parseFloat(t.size).toFixed(2)}</td><td class="${pnl >= 0 ? 'pnl-positive' : 'pnl-negative'}">${pnl >= 0 ? '+' : ''}$${pnl.toFixed(4)}</td><td><span style="color:${reasonColor};font-weight:600;font-size:11px;">${reasonLabel}</span></td></tr>`;
   }).join('');
 }
 
@@ -962,29 +653,22 @@ function sortTrades(col) {
   sortCol = col;
   currentTrades.sort((a, b) => {
     let va = a[col], vb = b[col];
-    if (col === 'pnl' || col === 'price' || col === 'size') {
-      va = parseFloat(va); vb = parseFloat(vb);
-      return sortAsc ? va - vb : vb - va;
-    }
-    va = String(va); vb = String(vb);
-    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    if (col === 'pnl' || col === 'price' || col === 'size') { va = parseFloat(va); vb = parseFloat(vb); return sortAsc ? va - vb : vb - va; }
+    va = String(va); vb = String(vb); return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
   });
   renderTrades(currentTrades);
 }
 
-// ========== SETTINGS ==========
-function toggleSettings() {
-  document.getElementById('settingsBody').classList.toggle('open');
-}
+function toggleSettings() { document.getElementById('settingsBody').classList.toggle('open'); }
 
 async function toggleDryRun() {
   const el = document.getElementById('dryRunToggle');
   el.classList.toggle('active');
   const isDry = el.classList.contains('active');
-  document.getElementById('dryRunLabel').textContent = isDry ? t('modes','dry_run_label') : t('modes','live_label');
+  document.getElementById('dryRunLabel').textContent = isDry ? '模拟' : '实盘';
   const badge = document.getElementById('globalStatus');
   badge.className = 'status-badge ' + (isDry ? 'dry' : 'live');
-  document.getElementById('globalStatusText').textContent = isDry ? t('modes','dry_run') : t('modes','live');
+  document.getElementById('globalStatusText').textContent = isDry ? '模拟' : '实盘';
   await api('/api/settings', 'PUT', { dry_run: isDry });
 }
 
@@ -992,7 +676,7 @@ async function toggleTrailing() {
   const el = document.getElementById('trailingToggle');
   el.classList.toggle('active');
   const isOn = el.classList.contains('active');
-  document.getElementById('trailingLabel').textContent = isOn ? 'Active' : 'Desactive';
+  document.getElementById('trailingLabel').textContent = isOn ? '开启' : '关闭';
   document.querySelectorAll('.trailing-settings').forEach(e => e.style.display = isOn ? '' : 'none');
   await api('/api/settings', 'PUT', { trailing_tp_enabled: isOn });
 }
@@ -1020,258 +704,74 @@ async function loadSettings() {
   document.getElementById('settingTP').value = s.take_profit_pct;
   document.getElementById('settingTrailAct').value = s.trailing_tp_activation || 30;
   document.getElementById('settingTrailDist').value = s.trailing_tp_distance || 15;
-
-  // Trailing toggle
   const trailToggle = document.getElementById('trailingToggle');
-  if (s.trailing_tp_enabled) {
-    trailToggle.classList.add('active');
-    document.getElementById('trailingLabel').textContent = 'Active';
-    document.querySelectorAll('.trailing-settings').forEach(e => e.style.display = '');
-  } else {
-    trailToggle.classList.remove('active');
-    document.getElementById('trailingLabel').textContent = 'Desactive';
-    document.querySelectorAll('.trailing-settings').forEach(e => e.style.display = 'none');
-  }
-
-  // Dry run toggle
+  if (s.trailing_tp_enabled) { trailToggle.classList.add('active'); document.getElementById('trailingLabel').textContent = '开启'; document.querySelectorAll('.trailing-settings').forEach(e => e.style.display = ''); }
+  else { trailToggle.classList.remove('active'); document.getElementById('trailingLabel').textContent = '关闭'; document.querySelectorAll('.trailing-settings').forEach(e => e.style.display = 'none'); }
   const dryToggle = document.getElementById('dryRunToggle');
   const badge = document.getElementById('globalStatus');
-  if (s.dry_run) {
-    dryToggle.classList.add('active');
-    badge.className = 'status-badge dry';
-    document.getElementById('globalStatusText').textContent = t('modes','dry_run');
-    document.getElementById('dryRunLabel').textContent = t('modes','dry_run_label');
-  } else {
-    dryToggle.classList.remove('active');
-    badge.className = 'status-badge live';
-    document.getElementById('globalStatusText').textContent = t('modes','live');
-    document.getElementById('dryRunLabel').textContent = t('modes','live_label');
-  }
+  if (s.dry_run) { dryToggle.classList.add('active'); badge.className = 'status-badge dry'; document.getElementById('globalStatusText').textContent = '模拟'; document.getElementById('dryRunLabel').textContent = '模拟'; }
+  else { dryToggle.classList.remove('active'); badge.className = 'status-badge live'; document.getElementById('globalStatusText').textContent = '实盘'; document.getElementById('dryRunLabel').textContent = '实盘'; }
 }
 
-// ========== STRATEGY HELP ==========
 const STRATEGY_HELP = {
   macd: {
-    title: "MACD (3/15/3)",
-    tag: "Momentum", tagColor: "#00e676", tagBg: "#00e67615",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le MACD (Moving Average Convergence Divergence) est un indicateur de <strong>momentum</strong> qui detecte les accelerations de prix.
-<br><br>
-<strong>Comment ca marche ?</strong>
-<ul>
-<li>Calcule 2 moyennes mobiles rapides (3 et 15 periodes)</li>
-<li><strong>BUY</strong> quand la ligne MACD croise au-dessus du signal (acceleration haussiere)</li>
-<li><strong>SELL</strong> quand la ligne MACD croise en dessous du signal (acceleration baissiere)</li>
-</ul>
-<strong>Quand l'utiliser ?</strong><br>
-Marches en tendance. Moins efficace quand le marche est plat (range).
-<br><br>
-<strong>Parametres :</strong> fast=3, slow=15, signal=3 (optimises pour les mouvements courts)`
+    title: "MACD (3/15/3)", tag: "动量策略", tagColor: "#00e676", tagBg: "#00e67615",
+    body: `<strong>这是什么？</strong><br>MACD（移动平均收敛发散）是一种<strong>动量指标</strong>，用于检测价格加速。<br><br><strong>工作原理：</strong><ul><li>计算两个快速移动平均线（3 和 15 周期）</li><li>当 MACD 线<strong>上穿</strong>信号线时 → <strong>买入</strong>（看涨）</li><li>当 MACD 线<strong>下穿</strong>信号线时 → <strong>卖出</strong>（看跌）</li></ul><strong>何时使用？</strong><br>有明显趋势的市场。横盘时效果不佳（会产生假信号）。<br><br><strong>参数：</strong> fast=3, slow=15, signal=3（针对短期波动优化）`
   },
   rsi: {
-    title: "RSI + VWAP",
-    tag: "Mean Reversion", tagColor: "#448aff", tagBg: "#448aff15",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le RSI (Relative Strength Index) mesure si un actif est <strong>survache ou survendu</strong>. Le VWAP (Volume Weighted Average Price) donne le prix moyen pondere par le volume.
-<br><br>
-<strong>Comment ca marche ?</strong>
-<ul>
-<li>RSI sous 30 + prix sous VWAP = <strong>BUY</strong> (survente, on attend un rebond)</li>
-<li>RSI au-dessus de 70 + prix au-dessus VWAP = <strong>SELL</strong> (surachat, on attend une correction)</li>
-<li>Le bot parie que le prix revient toujours vers sa moyenne</li>
-</ul>
-<strong>Quand l'utiliser ?</strong><br>
-Marches calmes avec des oscillations regulieres. Moins bon en forte tendance.
-<br><br>
-<strong>Parametres :</strong> RSI periode=14, survente=30, surachat=70`
+    title: "RSI + VWAP", tag: "均值回归", tagColor: "#448aff", tagBg: "#448aff15",
+    body: `<strong>这是什么？</strong><br>RSI（相对强弱指数）衡量资产是否<strong>超卖或超买</strong>。VWAP（成交量加权平均价）给出成交量加权的平均价格。<br><br><strong>工作原理：</strong><ul><li>RSI 低于 30 + 价格在 VWAP 下方 → <strong>买入</strong>（超卖，等待反弹）</li><li>RSI 高于 70 + 价格在 VWAP 上方 → <strong>卖出</strong>（超买，等待回调）</li><li>机器人赌价格总会回归均值</li></ul><strong>何时使用？</strong><br>波动较小、有规律振荡的市场。强趋势时表现不佳。<br><br><strong>参数：</strong> RSI 周期=14，超卖=30，超买=70`
   },
   cvd: {
-    title: "CVD Divergence",
-    tag: "Volume Delta", tagColor: "#b388ff", tagBg: "#b388ff15",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le CVD (Cumulative Volume Delta) mesure la <strong>pression acheteuse vs vendeuse</strong> reelle, au-dela du simple prix.
-<br><br>
-<strong>Comment ca marche ?</strong>
-<ul>
-<li>Si le prix <strong>baisse</strong> mais le volume d'achat <strong>augmente</strong> = achat cache → <strong>BUY</strong></li>
-<li>Si le prix <strong>monte</strong> mais le volume de vente <strong>augmente</strong> = vente cachee → <strong>SELL</strong></li>
-<li>Detecte les "divergences" entre ce que le prix montre et ce que l'argent fait vraiment</li>
-</ul>
-<strong>Quand l'utiliser ?</strong><br>
-Retournements de tendance. Le signal est plus rare mais souvent plus fiable.
-<br><br>
-<strong>Parametres :</strong> lookback=20 bougies, qualite d'approximation ponderee`
+    title: "CVD 背离", tag: "成交量 Delta", tagColor: "#b388ff", tagBg: "#b388ff15",
+    body: `<strong>这是什么？</strong><br>CVD（累积成交量 Delta）衡量<strong>真实的买入 vs 卖出压力</strong>，超越单纯的价格分析。<br><br><strong>工作原理：</strong><ul><li>如果价格<strong>下跌</strong>但买入量<strong>增加</strong> = 隐藏买入 → <strong>买入</strong></li><li>如果价格<strong>上涨</strong>但卖出量<strong>增加</strong> = 隐藏卖出 → <strong>卖出</strong></li><li>检测价格走势与真实资金流向之间的"背离"</li></ul><strong>何时使用？</strong><br>趋势反转时。信号较少但往往更可靠。<br><br><strong>参数：</strong> 回看=20 根 K 线，加权近似质量`
   },
   copytrade: {
-    title: "Copy Trading",
-    tag: "Social Trading", tagColor: "#ff9100", tagBg: "#ff910015",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Au lieu d'analyser des graphiques, cette strategie <strong>copie les meilleurs traders</strong> de Polymarket.
-<br><br>
-<strong>Comment ca marche ?</strong>
-<ul>
-<li>Scanne l'API Polymarket pour decouvrir les wallets actifs</li>
-<li>Score chaque wallet : win rate, profit factor, nombre de trades</li>
-<li>Garde les <strong>6 meilleurs</strong> (win rate >= 55%, min 20 trades)</li>
-<li>Quand un top wallet entre en position → le bot <strong>copie le trade</strong></li>
-<li>Le token_id change dynamiquement selon le marche copie</li>
-</ul>
-<strong>Quand l'utiliser ?</strong><br>
-Toujours. C'est potentiellement la strategie la plus rentable car elle suit des traders humains qui ont un vrai avantage sur les marches de prediction.
-<br><br>
-<strong>Parametres :</strong> top_n=6, min_win_rate=55%, scan toutes les 60s, rescoring toutes les heures`
+    title: "跟单交易", tag: "社交交易", tagColor: "#ff9100", tagBg: "#ff910015",
+    body: `<strong>这是什么？</strong><br>这个策略不分析图表，而是<strong>复制 Polymarket 上最优秀的交易者</strong>。<br><br><strong>工作原理：</strong><ul><li>扫描 Polymarket API 发现活跃钱包</li><li>对每个钱包评分：胜率、盈利因子、交易数量</li><li>保留<strong>排名前 6</strong>（胜率 ≥ 55%，至少 20 笔交易）</li><li>当排名前钱包建仓时 → 机器人<strong>复制这笔交易</strong></li><li>token_id 随跟踪的品种动态变化</li></ul><strong>何时使用？</strong><br>随时。这是一个潜力最大的策略，因为它跟随在预测市场上有真正优势的人类交易者。<br><br><strong>参数：</strong> top_n=6, min_win_rate=55%, 每 60 秒扫描, 每小时重新评分`
   }
 };
 
 const SECTION_HELP = {
   total_pnl: {
-    title: "Gain/Perte total (PnL)",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le PnL (Profit and Loss) total est la <strong>somme de tous les gains et pertes</strong> de toutes les strategies depuis le lancement.
-<br><br>
-<strong>Comment le lire ?</strong>
-<ul>
-<li><strong style="color:var(--green)">Vert (+)</strong> = tu gagnes de l'argent globalement</li>
-<li><strong style="color:var(--red)">Rouge (-)</strong> = tu perds de l'argent globalement</li>
-</ul>
-Ce chiffre inclut les 4 strategies : MACD, RSI, CVD et Copy Trading.`
+    title: "总盈亏 (PnL)",
+    body: `<strong>这是什么？</strong><br>总盈亏是所有策略自启动以来<strong>盈亏之和</strong>。<br><br><strong>如何解读？</strong><ul><li><strong style="color:var(--green)">绿色（+）</strong> = 你整体在赚钱</li><li><strong style="color:var(--red)">红色（-）</strong> = 你整体在亏钱</li></ul>这个数字包含 4 种策略：MACD、RSI、CVD 和跟单交易。`
   },
   best_strategy: {
-    title: "Meilleure strategie",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-La strategie qui a le <strong>meilleur taux de reussite</strong> (pourcentage de transactions gagnantes) parmi les 4.
-<br><br>
-<strong>A quoi ca sert ?</strong><br>
-Ca te permet d'identifier quelle approche fonctionne le mieux dans les conditions de marche actuelles. Tu peux desactiver les strategies moins performantes pour concentrer ton capital.`
+    title: "最佳策略",
+    body: `<strong>这是什么？</strong><br>4 个策略中<strong>成功率最高</strong>（盈利交易占比）的策略。<br><br><strong>有什么用？</strong><br>帮助你识别当前市场条件下哪种方法效果最好。你可以关闭表现较差的策略，集中资金。`
   },
   total_trades: {
-    title: "Total des transactions",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le nombre total d'operations (achats + ventes) executees par tous les bots depuis le lancement.
-<br><br>
-<strong>Pourquoi c'est important ?</strong><br>
-Plus il y a de transactions, plus les statistiques (win rate, Sharpe) sont fiables. Avec moins de 20 transactions, les chiffres ne veulent pas dire grand-chose.`
+    title: "总交易次数",
+    body: `<strong>这是什么？</strong><br>自启动以来所有机器人执行的买入 + 卖出操作总数。<br><br><strong>为什么重要？</strong><br>交易越多，统计数据（胜率、夏普比率）越可靠。少于 20 笔交易时，数据意义不大。`
   },
   sharpe: {
-    title: "Ratio de Sharpe",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le Sharpe mesure le <strong>rendement par rapport au risque</strong>. C'est la note de performance du bot.
-<br><br>
-<strong>Comment le lire ?</strong>
-<ul>
-<li><strong>< 0</strong> = le bot perd de l'argent</li>
-<li><strong>0 a 0.5</strong> = mediocre</li>
-<li><strong>0.5 a 1</strong> = correct</li>
-<li><strong>> 1</strong> = bon</li>
-<li><strong>> 2</strong> = excellent</li>
-</ul>
-Calcule par trade (non annualise).`
+    title: "夏普比率",
+    body: `<strong>这是什么？</strong><br>夏普比率衡量<strong>风险调整后的收益</strong>。这是机器人的性能评分。<br><br><strong>如何解读？</strong><ul><li><strong>&lt; 0</strong> = 机器人在亏钱</li><li><strong>0 ~ 0.5</strong> = 一般</li><li><strong>0.5 ~ 1</strong> = 尚可</li><li><strong>&gt; 1</strong> = 良好</li><li><strong>&gt; 2</strong> = 优秀</li></ul>按交易计算（不年化）。`
   },
   equity_curve: {
-    title: "Courbe de capital",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le graphique montre l'<strong>evolution du capital</strong> pour chaque strategie au fil du temps.
-<br><br>
-<strong>Comment le lire ?</strong>
-<ul>
-<li>Ligne qui <strong>monte</strong> = la strategie gagne</li>
-<li>Ligne qui <strong>descend</strong> = la strategie perd</li>
-<li>Ligne <strong>reguliere</strong> = strategie stable (bon signe)</li>
-<li>Ligne en <strong>dents de scie</strong> = strategie volatile (risquee)</li>
-</ul>`
+    title: "资金曲线",
+    body: `<strong>这是什么？</strong><br>图表显示每种策略<strong>资金随时间的变化</strong>。<br><br><strong>如何解读？</strong><ul><li>线<strong>向上</strong> = 策略在赚钱</li><li>线<strong>向下</strong> = 策略在亏钱</li><li>线<strong>平稳</strong> = 策略稳定（好迹象）</li><li>线<strong>剧烈波动</strong> = 策略风险高</li></ul>`
   },
   win_rate_chart: {
-    title: "Taux de reussite comparatif",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Compare le <strong>pourcentage de transactions gagnantes</strong> de chaque strategie.
-<br><br>
-<strong>Comment le lire ?</strong>
-<ul>
-<li><strong>> 55%</strong> = la strategie est rentable (en theorie)</li>
-<li><strong>50%</strong> = la strategie est aleatoire (pile ou face)</li>
-<li><strong>< 45%</strong> = la strategie perd, a desactiver</li>
-</ul>
-Le win rate seul ne suffit pas — un win rate de 40% peut etre rentable si les gains sont gros et les pertes petites.`
+    title: "成功率对比",
+    body: `<strong>这是什么？</strong><br>比较每种策略的<strong>盈利交易占比</strong>。<br><br><strong>如何解读？</strong><ul><li><strong>&gt; 55%</strong> = 策略理论上可盈利</li><li><strong>50%</strong> = 策略相当于随机（抛硬币）</li><li><strong>&lt; 45%</strong> = 策略亏损，应关闭</li></ul>仅看胜率不够 — 40% 的胜率也可能在盈亏比好时盈利。`
   },
   risk_section: {
-    title: "Gestion des risques",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Les <strong>garde-fous</strong> qui empechent le bot de perdre trop d'argent.
-<br><br>
-<strong>Ligne du haut — les controles :</strong>
-<ul>
-<li><strong>Perte journaliere</strong> : barre de progression — si elle atteint 100%, les bots sont bloques</li>
-<li><strong>Positions ouvertes</strong> : pastilles M/R/C/CT — vertes si actives</li>
-<li><strong>Taille par bot</strong> : montant max par transaction</li>
-</ul>
-<strong>Ligne du bas — les protections avancees :</strong>
-<ul>
-<li><strong>Solde USDC</strong> : capital actuel du wallet. Sert a calculer le sizing dynamique (risque 1-2%)</li>
-<li><strong>Niveau incubation</strong> : progression du scaler (Niv. 1 = $1 max → Niv. 5 = $100 max). Monte automatiquement si win rate > 55%</li>
-<li><strong>Trailing TP</strong> : etat du take-profit dynamique (Active/Desactive, seuils d'activation et distance)</li>
-</ul>
-<strong>Bouton "Tout arreter"</strong> : arret d'urgence — coupe tous les bots et annule les ordres.`
+    title: "风险管理",
+    body: `<strong>这是什么？</strong><br>防止机器人亏损过多的<strong>保护机制</strong>。<br><br><strong>第一行 — 控制项：</strong><ul><li><strong>日亏损</strong>：进度条 — 达到 100% 时机器人被阻止</li><li><strong>开仓仓位</strong>：M/R/C/CT 圆点 — 绿色表示活跃</li><li><strong>每机器人仓位</strong>：每笔交易的最大金额</li></ul><strong>第二行 — 高级保护：</strong><ul><li><strong>USDC 余额</strong>：钱包当前本金。用于计算动态仓位（风险 1-2%）</li><li><strong>孵化等级</strong>：缩放器进度（等级 1 = 最大 $1 → 等级 5 = 最大 $100）。胜率 > 55% 时自动升级</li><li><strong>移动止盈</strong>：动态止盈状态（开启/关闭，激活和距离阈值）</li></ul><strong>"全部停止"按钮：</strong>紧急停止 — 关闭所有机器人并取消所有订单。`
   },
   trade_log: {
-    title: "Journal des transactions",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-La liste de <strong>toutes les transactions executees</strong> par les bots, du plus recent au plus ancien (50 dernieres).
-<br><br>
-<strong>Colonnes :</strong>
-<ul>
-<li><strong>Heure</strong> : quand la transaction a ete executee</li>
-<li><strong>Strategie</strong> : quel bot l'a fait</li>
-<li><strong>BUY/SELL</strong> : achat ou vente</li>
-<li><strong>Prix</strong> : prix d'execution</li>
-<li><strong>Taille</strong> : montant en $ (calcule dynamiquement)</li>
-<li><strong>PnL</strong> : gain (+) ou perte (-)</li>
-<li><strong>Raison</strong> : ce qui a declenche la cloture :
-  <br>— <strong style="color:var(--blue)">Signal</strong> = ouverture sur signal strategie
-  <br>— <strong style="color:var(--amber)">Retournement</strong> = la strategie a change d'avis
-  <br>— <strong style="color:var(--red)">Stop-Loss</strong> = perte max atteinte
-  <br>— <strong style="color:var(--green)">Take-Profit</strong> = gain cible atteint
-  <br>— <strong style="color:var(--purple)">Trailing TP</strong> = recul depuis le sommet</li>
-</ul>
-Clique sur un titre de colonne pour trier.`
+    title: "交易日志",
+    body: `<strong>这是什么？</strong><br>机器人执行的所有交易列表，从最新到最早（最近 50 笔）。<br><br><strong>列说明：</strong><ul><li><strong>时间</strong>：交易执行时间</li><li><strong>策略</strong>：哪个机器人执行的</li><li><strong>买入/卖出</strong>：方向</li><li><strong>价格</strong>：执行价格</li><li><strong>仓位</strong>：金额（动态计算）</li><li><strong>盈亏</strong>：盈利（+）或亏损（-）</li><li><strong>原因</strong>：触发平仓的原因：<br>— <strong style="color:var(--blue)">信号</strong> = 按策略信号开仓<br>— <strong style="color:var(--amber)">反转</strong> = 策略改变方向<br>— <strong style="color:var(--red)">止损</strong> = 达到最大亏损<br>— <strong style="color:var(--green)">止盈</strong> = 达到目标盈利<br>— <strong style="color:var(--purple)">移动止盈</strong> = 从高点回落</li></ul>点击列标题可排序。`
   },
   logs_section: {
-    title: "Logs",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Le journal de bord en temps reel de tous les evenements du bot.
-<br><br>
-<strong>Types de logs :</strong>
-<ul>
-<li><strong style="color:var(--blue)">INFO</strong> — Demarrage/arret des bots, evenements normaux</li>
-<li><strong style="color:var(--green)">TRADE</strong> — Chaque transaction executee avec prix et PnL</li>
-<li><strong style="color:var(--amber)">WARN</strong> — Arrets d'urgence, situations anormales</li>
-<li><strong style="color:var(--red)">ERROR</strong> — Erreurs de connexion, crashes de bots</li>
-</ul>
-Utilise les filtres pour voir uniquement les transactions ou les erreurs. Les 200 derniers logs sont conserves en memoire.`
+    title: "日志",
+    body: `<strong>这是什么？</strong><br>所有机器人事件的实时日志。<br><br><strong>日志类型：</strong><ul><li><strong style="color:var(--blue)">INFO</strong> — 机器人启动/停止，正常事件</li><li><strong style="color:var(--green)">TRADE</strong> — 每笔交易的执行价格和盈亏</li><li><strong style="color:var(--amber)">WARN</strong> — 紧急停止，异常情况</li><li><strong style="color:var(--red)">ERROR</strong> — 连接错误，机器人崩溃</li></ul>使用过滤器只看交易或错误。内存中保留最近 200 条日志。`
   },
   settings_section: {
-    title: "Parametres",
-    body: `<strong>Qu'est-ce que c'est ?</strong><br>
-Les reglages qui controlent le comportement de tous les bots.
-<br><br>
-<strong>Parametres principaux :</strong>
-<ul>
-<li><strong>Taille de position</strong> : montant max par transaction (defaut : $1)</li>
-<li><strong>Risque % par transaction</strong> : pourcentage du capital risque (defaut : 1%). Le bot calcule la taille optimale a partir de ce %, du solde USDC et du stop-loss</li>
-<li><strong>Stop Loss %</strong> : fermeture automatique si perte > X% (defaut : 5%)</li>
-<li><strong>Take Profit %</strong> : prise de profit si gain > X% (defaut : 10%)</li>
-</ul>
-<strong>Trailing Take-Profit :</strong>
-<ul>
-<li><strong>Toggle</strong> : active/desactive le TP dynamique. Quand actif, le TP fixe est desactive</li>
-<li><strong>Activation %</strong> : gain minimum avant que le trailing demarre (defaut : 30%)</li>
-<li><strong>Distance %</strong> : recul depuis le sommet pour declencher la vente (defaut : 15%)</li>
-</ul>
-<strong>Autres :</strong>
-<ul>
-<li><strong>Mode</strong> : Simulation (faux argent) ou Live (vrai argent)</li>
-<li><strong>Compte</strong> : quel wallet Polymarket utiliser</li>
-</ul>
-<strong>Conseil :</strong> ne change rien au debut. Laisse les valeurs par defaut.`
+    title: "参数设置",
+    body: `<strong>这是什么？</strong><br>控制所有机器人行为的参数。<br><br><strong>主要参数：</strong><ul><li><strong>仓位大小</strong>：每笔交易最大金额（默认：$1）</li><li><strong>每笔交易风险 %</strong>：风险敞口占本金的百分比（默认：1%）。机器人根据此百分比、USDC 余额和止损计算最优仓位</li><li><strong>止损 %</strong>：亏损超过 X% 时自动平仓（默认：5%）</li><li><strong>止盈 %</strong>：盈利达到 X% 时获利了结（默认：10%）</li></ul><strong>移动止盈：</strong><ul><li><strong>开关</strong>：开启/关闭动态止盈。开启时固定止盈会被禁用</li><li><strong>激活 %</strong>：移动止盈启动前的最低盈利（默认：30%）</li><li><strong>距离 %</strong>：从高点回落触发卖出的百分比（默认：15%）</li></ul><strong>其他：</strong><ul><li><strong>模式</strong>：模拟（虚拟资金）或实盘（真实资金）</li><li><strong>账户</strong>：使用哪个 Polymarket 钱包</li></ul><strong>建议：</strong> 初期不要修改任何参数，使用默认值。`
   }
 };
 
@@ -1287,20 +787,14 @@ function openStrategyHelp(key) {
   const info = STRATEGY_HELP[key];
   if (!info) return;
   document.getElementById('modalTitle').innerHTML = `<span class="modal-icon" style="background:${info.tagBg};color:${info.tagColor};">S</span> ${info.title}`;
-  document.getElementById('modalBody').innerHTML =
-    `<span class="modal-tag" style="color:${info.tagColor};background:${info.tagBg};border:1px solid ${info.tagColor}30">${info.tag}</span><br>` + info.body;
+  document.getElementById('modalBody').innerHTML = `<span class="modal-tag" style="color:${info.tagColor};background:${info.tagBg};border:1px solid ${info.tagColor}30">${info.tag}</span><br>` + info.body;
   document.getElementById('strategyModal').classList.add('show');
 }
 
-function closeStrategyHelp() {
-  document.getElementById('strategyModal').classList.remove('show');
-}
-
+function closeStrategyHelp() { document.getElementById('strategyModal').classList.remove('show'); }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeStrategyHelp(); });
 
-// ========== LOGS ==========
 let currentLogFilter = '';
-
 function filterLogs(level) {
   currentLogFilter = level;
   document.querySelectorAll('.log-filter-btn').forEach(b => b.classList.remove('active'));
@@ -1315,23 +809,14 @@ async function refreshLogs() {
   const logs = await api(url);
   if (!logs) return;
   const container = document.getElementById('logEntries');
-  if (logs.length === 0) {
-    container.innerHTML = '<div style="color:var(--text-2);padding:20px;text-align:center;">Aucun log</div>';
-    return;
-  }
+  if (logs.length === 0) { container.innerHTML = '<div style="color:var(--text-2);padding:20px;text-align:center;">暂无日志</div>'; return; }
   container.innerHTML = logs.slice().reverse().map(l => {
     const time = l.time ? l.time.replace('T', ' ').slice(11, 19) : '--';
-    return `<div class="log-entry">
-      <span class="log-time">${time}</span>
-      <span class="log-level ${l.level}">${l.level}</span>
-      <span class="log-source">[${l.source}]</span>
-      <span class="log-msg">${l.message}</span>
-    </div>`;
+    return `<div class="log-entry"><span class="log-time">${time}</span><span class="log-level ${l.level}">${l.level}</span><span class="log-source">[${l.source}]</span><span class="log-msg">${l.message}</span></div>`;
   }).join('');
   container.scrollTop = 0;
 }
 
-// ========== TABS ==========
 const TABS = ['dashboard', 'config', 'docs', 'audit'];
 function switchTab(tab) {
   TABS.forEach(t => {
@@ -1345,7 +830,7 @@ function switchTab(tab) {
 }
 
 function loadDocFrame(page) {
-  const urls = { guide: '/static/guide.html', docs: '/static/docs.html', api: '/docs' };
+  const urls = { guide: '/static/guide_zh.html', docs: '/static/docs_zh.html', api: '/docs' };
   document.getElementById('docFrame').src = urls[page] || urls.guide;
   ['Guide','Docs','Api'].forEach(b => {
     const el = document.getElementById('docBtn' + b);
@@ -1353,95 +838,59 @@ function loadDocFrame(page) {
   });
 }
 
-// ========== CONFIGURATION ==========
-
 async function loadConfig() {
   const data = await api('/api/config');
   if (!data) return;
   for (const [key, val] of Object.entries(data)) {
     const el = document.getElementById('cfg_' + key);
-    if (el) {
-      if (el.tagName === 'SELECT') {
-        el.value = val;
-      } else {
-        el.value = val;
-      }
-    }
+    if (el) el.value = val;
   }
 }
 
 async function saveConfig() {
   const inputs = document.querySelectorAll('.cfg');
   const body = {};
-  inputs.forEach(el => {
-    const key = el.id.replace('cfg_', '');
-    body[key] = el.value;
-  });
+  inputs.forEach(el => { const key = el.id.replace('cfg_', ''); body[key] = el.value; });
   const res = await api('/api/config', 'PUT', body);
   const status = document.getElementById('configStatus');
   if (res && res.updated) {
     status.style.color = 'var(--green)';
-    status.textContent = res.updated.length > 0
-      ? 'Enregistre (' + res.updated.join(', ') + ')'
-      : 'Aucune modification';
+    status.textContent = res.updated.length > 0 ? '已保存 (' + res.updated.join(', ') + ')' : '无修改';
     setTimeout(() => status.textContent = '', 4000);
   } else {
     status.style.color = 'var(--red)';
-    status.textContent = 'Erreur';
+    status.textContent = '错误';
   }
 }
 
-// ========== MAIN REFRESH LOOP ==========
 async function refreshAll() {
-  const [bots, metrics, trades, risk] = await Promise.all([
-    api('/api/bots'),
-    api('/api/metrics'),
-    api('/api/trades?limit=50'),
-    api('/api/risk'),
-  ]);
-
-  if (bots) {
-    renderBots(bots);
-    updateEquityChart(bots);
-    updateWinRateChart(bots);
-  }
+  const [bots, metrics, trades, risk] = await Promise.all([api('/api/bots'), api('/api/metrics'), api('/api/trades?limit=50'), api('/api/risk')]);
+  if (bots) { renderBots(bots); updateEquityChart(bots); updateWinRateChart(bots); }
   if (metrics) renderMetrics(metrics);
-  if (trades) {
-    currentTrades = trades;
-    renderTrades(trades);
-  }
+  if (trades) { currentTrades = trades; renderTrades(trades); }
   if (risk) renderRisk(risk);
   refreshLogs();
 }
 
-// ========== INIT ==========
 Chart.defaults.color = '#8694a7';
 Chart.defaults.borderColor = '#d0d7e0';
 Chart.defaults.font.family = "'JetBrains Mono', monospace";
 Chart.defaults.font.size = 10;
 
 (async function init() {
-  // Auth check — redirect to login if no valid token
   const token = localStorage.getItem('auth_token');
   if (!token) { window.location.href = '/static/login.html'; return; }
   const check = await fetch('/api/auth/check', { headers: { 'Authorization': 'Bearer ' + token } }).catch(() => null);
   if (!check || !check.ok) { localStorage.removeItem('auth_token'); window.location.href = '/static/login.html'; return; }
-
-  await loadI18n();
   await loadSettings();
   await refreshAll();
-  // Auto-refresh every 3 seconds
   setInterval(refreshAll, POLL_INTERVAL);
 })();
 </script>
 
-<!-- Strategy help modal -->
 <div class="modal-overlay" id="strategyModal" onclick="if(event.target===this)closeStrategyHelp()">
   <div class="modal">
-    <div class="modal-header">
-      <h3 id="modalTitle"></h3>
-      <button class="modal-close" onclick="closeStrategyHelp()">&times;</button>
-    </div>
+    <div class="modal-header"><h3 id="modalTitle"></h3><button class="modal-close" onclick="closeStrategyHelp()">&times;</button></div>
     <div class="modal-body" id="modalBody"></div>
   </div>
 </div>

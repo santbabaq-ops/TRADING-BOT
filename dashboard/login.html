@@ -1,184 +1,43 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connexion</title>
+<title>登录</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
 :root {
-  --bg-0: #eef1f5;
-  --bg-1: #f5f7fa;
-  --bg-2: #ffffff;
-  --bg-3: #e8ecf1;
-  --border: #d0d7e0;
-  --text-0: #1a2332;
-  --text-1: #4a5568;
-  --text-2: #8694a7;
-  --blue: #2563eb;
-  --blue-hover: #1d4ed8;
-  --blue-dim: #2563eb12;
-  --red: #d32f2f;
-  --red-dim: #d32f2f10;
-  --green: #0d9f4f;
+  --bg-0: #eef1f5; --bg-1: #f5f7fa; --bg-2: #ffffff; --bg-3: #e8ecf1;
+  --border: #d0d7e0; --text-0: #1a2332; --text-1: #4a5568; --text-2: #8694a7;
+  --blue: #2563eb; --blue-hover: #1d4ed8; --blue-dim: #2563eb12;
+  --red: #d32f2f; --red-dim: #d32f2f10; --green: #0d9f4f;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  --font-sans: 'Instrument Sans', -apple-system, sans-serif;
-  --radius: 6px;
+  --font-sans: 'Instrument Sans', -apple-system, sans-serif; --radius: 6px;
 }
-
 html { font-size: 14px; }
-
-body {
-  background: var(--bg-0);
-  color: var(--text-0);
-  font-family: var(--font-mono);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 60px 60px;
-  opacity: 0.3;
-}
-
-.login-container {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 380px;
-  padding: 0 20px;
-  animation: slideUp 0.4s ease-out;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.login-card {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 36px 28px 32px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.login-logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.login-logo-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--blue);
-  box-shadow: 0 0 8px #2563eb40;
-}
-
-.login-logo-text {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-0);
-}
-
-.login-subtitle {
-  font-size: 0.78rem;
-  color: var(--text-2);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
+body { background: var(--bg-0); color: var(--text-0); font-family: var(--font-mono); min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.3; }
+.login-container { position: relative; z-index: 1; width: 100%; max-width: 380px; padding: 0 20px; animation: slideUp 0.4s ease-out; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.login-card { background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px; padding: 36px 28px 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.04); }
+.login-header { text-align: center; margin-bottom: 28px; }
+.login-logo { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.login-logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 8px #2563eb40; }
+.login-logo-text { font-family: var(--font-sans); font-weight: 700; font-size: 1.1rem; color: var(--text-0); }
+.login-subtitle { font-size: 0.78rem; color: var(--text-2); letter-spacing: 0.04em; text-transform: uppercase; }
 .form-group { margin-bottom: 14px; }
-
-.form-label {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: var(--text-1);
-  margin-bottom: 5px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 10px 12px;
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  color: var(--text-0);
-  background: var(--bg-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-input:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px var(--blue-dim);
-}
-
-.form-input.error {
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px var(--red-dim);
-}
-
-.btn-login {
-  width: 100%;
-  padding: 11px 0;
-  margin-top: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #fff;
-  background: var(--blue);
-  border: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
+.form-label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--text-1); margin-bottom: 5px; }
+.form-input { width: 100%; padding: 10px 12px; font-family: var(--font-mono); font-size: 0.9rem; color: var(--text-0); background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--radius); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+.form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+.form-input.error { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-dim); }
+.btn-login { width: 100%; padding: 11px 0; margin-top: 6px; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600; color: #fff; background: var(--blue); border: none; border-radius: var(--radius); cursor: pointer; transition: background 0.15s; }
 .btn-login:hover { background: var(--blue-hover); }
 .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
-
-.error-msg {
-  margin-top: 12px;
-  padding: 8px 12px;
-  font-size: 0.78rem;
-  color: var(--red);
-  background: var(--red-dim);
-  border-radius: var(--radius);
-  text-align: center;
-  display: none;
-}
-
+.error-msg { margin-top: 12px; padding: 8px 12px; font-size: 0.78rem; color: var(--red); background: var(--red-dim); border-radius: var(--radius); text-align: center; display: none; }
 .error-msg.visible { display: block; }
-
-.login-footer {
-  text-align: center;
-  margin-top: 16px;
-  font-size: 0.72rem;
-  color: var(--text-2);
-}
+.login-footer { text-align: center; margin-top: 16px; font-size: 0.72rem; color: var(--text-2); }
 </style>
 </head>
 <body>
@@ -188,26 +47,23 @@ body::before {
     <div class="login-header">
       <div class="login-logo">
         <div class="login-logo-dot"></div>
-        <div class="login-logo-text">Connexion</div>
+        <div class="login-logo-text">Polymarket RBI 交易机器人</div>
       </div>
     </div>
-
     <form id="loginForm" autocomplete="on">
       <div class="form-group">
-        <label class="form-label" for="username">Identifiant</label>
-        <input class="form-input" type="text" id="username" name="username"
-               autocomplete="username" required autofocus>
+        <label class="form-label" for="username">用户名</label>
+        <input class="form-input" type="text" id="username" name="username" autocomplete="username" required autofocus>
       </div>
       <div class="form-group">
-        <label class="form-label" for="password">Mot de passe</label>
-        <input class="form-input" type="password" id="password" name="password"
-               autocomplete="current-password" required>
+        <label class="form-label" for="password">密码</label>
+        <input class="form-input" type="password" id="password" name="password" autocomplete="current-password" required>
       </div>
-      <button class="btn-login" type="submit" id="btnLogin">Se connecter</button>
+      <button class="btn-login" type="submit" id="btnLogin">登录</button>
       <div class="error-msg" id="errorMsg"></div>
     </form>
   </div>
-  <div class="login-footer">trading.youpiare.fr</div>
+  <div class="login-footer">Polymarket RBI Bot</div>
 </div>
 
 <script>
@@ -219,7 +75,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   errorEl.classList.remove('visible');
   btn.disabled = true;
-  btn.textContent = '...';
+  btn.textContent = '登录中...';
 
   try {
     const res = await fetch('/api/auth/login', {
@@ -235,13 +91,13 @@ form.addEventListener('submit', async (e) => {
       localStorage.setItem('auth_token', data.token);
       window.location.href = '/';
     } else {
-      showError(data.detail || 'Identifiants incorrects');
+      showError(data.detail || '用户名或密码错误');
     }
   } catch {
-    showError('Erreur de connexion au serveur');
+    showError('无法连接服务器');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Se connecter';
+    btn.textContent = '登录';
   }
 });
 
@@ -250,7 +106,6 @@ function showError(msg) {
   errorEl.classList.add('visible');
 }
 
-// Already logged in? redirect
 const t = localStorage.getItem('auth_token');
 if (t) {
   fetch('/api/auth/check', { headers: { 'Authorization': 'Bearer ' + t } })
